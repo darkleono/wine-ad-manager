@@ -6,10 +6,18 @@ RUN dnf update -y && \
     libnsl \
     procps-ng \
     iproute \
+    python3 \
+    python3-pip \
     && dnf clean all
 
-# Fixed for EL9: Create LSB loader symlink (deprecated in Rocky 9 but needed by NLM)
+# Install Flask for the dashboard
+RUN pip3 install flask
+
+# Create LSB loader symlink
 RUN ln -s /lib64/ld-linux-x86-64.so.2 /lib64/ld-lsb-x86-64.so.3
+
+# Copy dashboard files
+COPY dashboard/ /opt/dashboard/
 
 # Create temporary directory for the RPM
 WORKDIR /tmp

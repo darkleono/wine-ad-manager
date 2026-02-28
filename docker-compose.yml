@@ -11,6 +11,7 @@ services:
     ports:
       - "27000:27000"
       - "2080:2080"
+      - "8080:8080"
     volumes:
       # Mount your license file folder
       - ./licence:/var/flexlm:ro

@@ -11,8 +11,12 @@ fi
 # Sometimes needed for FlexNet to find it
 cd /opt/flexnetserver
 
+# Start the Web Dashboard in the background
+echo "Starting Web Dashboard on port 8080..."
+python3 /opt/dashboard/app.py &
+
 # Start the license manager in the foreground (-z)
 # -c specifies the license file
 # -l specifies the log (optional, but good for debugging)
 echo "Starting Autodesk Network License Manager..."
-./lmgrd -z -c /var/flexlm/licenses.lic
+exec ./lmgrd -z -c /var/flexlm/licenses.lic

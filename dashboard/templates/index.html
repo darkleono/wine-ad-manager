@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AD-LIC-HP | Dashboard</title>
+    <style>
+        :root {
+            --primary: #0696d7;
+            --bg: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-dim: #94a3b8;
+            --success: #10b981;
+            --error: #ef4444;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', system-ui, sans-serif; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--card-bg);
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .status-up { background: rgba(16, 185, 129, 0.1); color: var(--success); }
+        .status-down { background: rgba(239, 68, 68, 0.1); color: var(--error); }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            background: var(--card-bg);
+            padding: 1.5rem;
+            border-radius: 1rem;
+            border: 1px solid rgba(255,255,255,0.05);
+            transition: transform 0.2s;
+        }
+
+        .card:hover { transform: translateY(-4px); }
+
+        .feature-name { font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem; color: var(--primary); }
+
+        .usage-bar-container {
+            height: 8px;
+            background: #334155;
+            border-radius: 4px;
+            margin: 1rem 0;
+            overflow: hidden;
+        }
+
+        .usage-bar {
+            height: 100%;
+            background: var(--primary);
+            transition: width 0.5s ease;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--text-dim);
+        }
+
+        .actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        button {
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { opacity: 0.9; }
+
+        pre {
+            background: #000;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem;
+            color: #10b981;
+            overflow-x: auto;
+            max-height: 300px;
+        }
+
+        .section-title { margin: 2rem 0 1rem; font-size: 1.25rem; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div>
+            <h1>Autodesk License Manager</h1>
+            <p style="color: var(--text-dim)">Consola de administración visual</p>
+        </div>
+        <div id="server-status" class="status-badge status-down">
+            <span>Server Offline</span>
+        </div>
+    </div>
+
+    <div class="grid" id="feature-grid">
+        <!-- Tarjetas se cargan aqui -->
+    </div>
+
+    <div class="section-title">Log de Salida (lmstat)</div>
+    <pre id="raw-log">Cargando datos...</pre>
+
+    <div class="actions">
+        <button class="btn-primary" onclick="updateStatus()">Refrescar</button>
+        <button class="btn-primary" style="background: #334155" onclick="reloadServer()">Reread License</button>
+    </div>
+
+    <script>
+        async function updateStatus() {
+            try {
+                const res = await fetch('/api/status');
+                const data = await res.json();
+                
+                const statusBadge = document.getElementById('server-status');
+                if (data.server_up) {
+                    statusBadge.className = 'status-badge status-up';
+                    statusBadge.innerHTML = '<span>● Server Online</span>';
+                } else {
+                    statusBadge.className = 'status-badge status-down';
+                    statusBadge.innerHTML = '<span>● Server Error/Offline</span>';
+                }
+
+                const grid = document.getElementById('feature-grid');
+                grid.innerHTML = '';
+                
+                data.usage.forEach(f => {
+                    grid.innerHTML += `
+                        <div class="card">
+                            <div class="feature-name">${f.feature}</div>
+                            <div class="stats">
+                                <span>Uso: ${f.used} / ${f.total}</span>
+                                <span>${f.percent}%</span>
+                            </div>
+                            <div class="usage-bar-container">
+                                <div class="usage-bar" style="width: ${f.percent}%"></div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+                document.getElementById('raw-log').innerText = data.raw_output;
+
+            } catch (err) {
+                console.error("Error cargando status:", err);
+            }
+        }
+
+        async function reloadServer() {
+            if(!confirm("¿Seguro que quieres recargar el archivo de licencias?")) return;
+            const res = await fetch('/api/reload');
+            const data = await res.json();
+            alert(data.message);
+            updateStatus();
+        }
+
+        updateStatus();
+        setInterval(updateStatus, 30000); // Auto-refrescar cada 30s
+    </script>
+</body>
+</html>
