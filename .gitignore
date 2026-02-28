@@ -1,0 +1,23 @@
+# Autodesk License Server Git Ignore
+
+# Excluir archivos de licencia reales (sensibles)
+licence/*.lic
+!licence/licenses.lic # Mantener el archivo de prueba si se desea, o excluirlo tambien
+# licence/licenses.lic
+
+# Excluir binarios grandes (RPM, TAR, MSI)
+bin/*.rpm
+bin/*.tar.gz
+bin/*.msi
+bin/*.json
+bin/*.mst
+
+# Logs de FlexNet
+*.log
+debug.log
+
+# Archivos de sistema y editores
+.DS_Store
+.idea/
+.vscode/
+node_modules/

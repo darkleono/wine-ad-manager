@@ -1,0 +1,18 @@
+version: '3.8'
+
+services:
+  autodesk-licenser:
+    platform: linux/amd64
+    build: .
+    container_name: autodesk-licenser
+    restart: always
+    # CRITICAL: Replace with the MAC address from your current license
+    mac_address: "AA:BB:CC:DD:EE:FF"
+    ports:
+      - "27000:27000"
+      - "2080:2080"
+    volumes:
+      # Mount your license file folder
+      - ./licence:/var/flexlm:ro
+    environment:
+      - TZ=America/Mexico_City
