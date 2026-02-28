@@ -5,6 +5,7 @@ services:
     platform: linux/amd64
     build: .
     container_name: autodesk-licenser
+    hostname: license-server
     restart: always
     # CRITICAL: Replace with the MAC address from your current license
     mac_address: "AA:BB:CC:DD:EE:FF"

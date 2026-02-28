@@ -1,5 +1,6 @@
 #!/bin/bash
 # entrypoint.sh
+echo "127.0.0.1 license-server" >> /etc/hosts
 
 # Ensure there's a license file
 if [ ! -f /var/flexlm/licenses.lic ]; then
