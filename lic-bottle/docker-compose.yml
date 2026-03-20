@@ -6,9 +6,10 @@ services:
     platform: linux/amd64
     container_name: autodesk-win-wine
     hostname: win-license-lab
+    mac_address: 66:12:8f:d2:36:30
     volumes:
       - ./bin:/app
     ports:
-      - "27001:27000"
-      - "2081:2080"
+      - "27000:27000"
+      - "2080:2080"
     restart: always

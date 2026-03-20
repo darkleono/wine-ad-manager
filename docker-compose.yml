@@ -8,13 +8,13 @@ services:
     hostname: license-server
     restart: always
     # CRITICAL: Replace with the MAC address from your current license
-    mac_address: "AA:BB:CC:DD:EE:FF"
+    mac_address: "00:00:00:00:07:70"
     ports:
       - "27000:27000"
       - "2080:2080"
       - "8080:8080"
     volumes:
       # Mount your license file folder
-      - ./licence:/var/flexlm:ro
+      - ./licence:/var/flexlm
     environment:
       - TZ=America/Mexico_City
