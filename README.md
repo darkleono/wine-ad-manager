@@ -1,6 +1,11 @@
 # Laboratorio: Autodesk License Manager (Windows .exe) en Docker via Wine
 
-Este proyecto permite ejecutar la versión de Windows de Autodesk Network License Manager (`lmgrd.exe`) dentro de un contenedor Linux utilizando **Wine**. Es una solución ideal para centralizar licencias de versiones antiguas (Legacy) o cuando no se dispone de binarios nativos de Linux, ahorrando el consumo de recursos de una Máquina Virtual completa de Windows.
+Este proyecto permite ejecutar la versión de Windows de Autodesk Network License Manager (`lmgrd.exe`) dentro de un contenedor Linux utilizando **Wine**.
+
+## 📊 Estado del Desarrollo
+- **Última Actualización:** 2026-03-22 | 07:54 AM
+- **Último Commit ID:** `ebd3488636e83bdbee577c951406dd781d7cb061`
+- **Avance Actual:** Implementación de persistencia vía volúmenes, límites de borrow (7 días) para AutoCAD 2025/2026, Dashboard mejorado y unificación de carpetas del proyecto en `/bin`.
 
 ## 🚀 Logros de este Laboratorio
 - **Sincronización Total:** Se resolvió el error de "HostID mismatch" sincronizando la MAC Address del contenedor con el archivo de licencia.
