@@ -1,24 +1,29 @@
 # Autodesk License Server Dockerized (ad-lic-hp)
 
-Este repositorio contiene la configuración necesaria para desplegar un servidor de licencias de Autodesk (NLM) utilizando Docker, optimizado para entornos corporativos con acceso limitado a internet.
+> [!IMPORTANT]
+> **PROYECTO ACTUALIZADO Y MIGRADO:** Este repositorio ha evolucionado hacia una implementación **altamente optimizada basada en Wine**, diseñada para despliegues modernos en la nube (VPS) y paneles como Easypanel.
 
-## Características
-- **Base:** Rocky Linux 9 (AMD64).
-- **Control de MAC:** Configurado vía `docker-compose.yml` para estabilidad de licencias.
-- **Administración Avanzada:** Soporte para archivo de opciones (`adskflex.opt`) para control de Borrowing y Timeouts.
-- **Eficiencia:** Bajo consumo de recursos y sin necesidad de licencias de Windows.
+---
 
-## Guías
-- [Guía de Administración](guia_administracion.md): Conceptos básicos y comandos de control.
-- [Walkthrough de Despliegue](walkthrough.md): Pasos técnicos para la puesta en marcha.
+## 🎯 Acceso a la Versión Definitiva: [`wine-ad-manager/`](./wine-ad-manager/)
 
-## Requisitos
-- Docker y Docker Compose instalados.
-- Binario RPM de Autodesk en la carpeta `bin/`.
-- Archivo de licencia `.lic` en la carpeta `licence/`.
+Se recomienda utilizar la solución ubicada en la subcarpeta `wine-ad-manager`, la cual ha logrado los siguientes hitos técnicos:
 
-## Instrucciones Rápidas
-1. Clonar el repositorio.
-2. Colocar el archivo `.lic` y el RPM.
-3. Configurar la MAC en `docker-compose.yml`.
-4. Ejecutar `docker-compose up -d --build`.
+### 🏆 Logros del Laboratorio
+- **Eficiencia Extrema:** El servidor de licencias ahora consume solo **~250MB de RAM** (una reducción masiva frente a los 1.5GB iniciales de una VM o contenedor pesado).
+- **Identidad Fija (HostID):** Sincronización automática de MAC Address vía `NET_ADMIN` para validación de licencias de Autodesk.
+- **Red Headless:** Uso de monitor virtual Xvfb minimizado (**1x1 píxel**) para ahorro máximo de recursos del servidor.
+- **Despliegue Multi-puerto:** Mapeo de puertos Master (27000) y Vendor (2080) expuestos al mundo exterior.
+- **Dashboard Web:** Panel de monitoreo Flask integrado para ver licencias en uso en tiempo real.
+
+---
+
+## 📂 Archivo Histórico (Raíz)
+Este repositorio mantiene en su raíz la configuración basada en **Rocky Linux 9 (AMD64)** para compatibilidad con instalaciones locales que utilicen binarios RPM nativos de Linux.
+
+### Guías del Archivo:
+- [Guía de Administración Antigua](guia_administracion.md)
+- [Walkthrough de Despliegue Antiguo](walkthrough.md)
+
+---
+*Este proyecto demuestra cómo modernizar infraestructuras de licencias "Legacy" mediante técnicas avanzadas de Dockerización y emulación ligera.*
