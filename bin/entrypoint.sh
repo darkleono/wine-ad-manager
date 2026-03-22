@@ -16,8 +16,8 @@ rm -f /tmp/.X99-lock /tmp/.X11-unix/X99
 # Resolución de host local (indispensable para FlexLM)
 echo "127.0.0.1 win-license-lab" >> /etc/hosts
 
-# Iniciar Framebuffer virtual en el background
-Xvfb :99 -ac -screen 0 1024x768x16 &
+# Iniciar Framebuffer virtual en el background (Resolución mínima para ahorrar RAM)
+Xvfb :99 -ac -screen 0 1x1x8 &
 sleep 2
 
 echo "Iniciando Dashboard en puerto 8080..."

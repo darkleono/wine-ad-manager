@@ -25,6 +25,7 @@ COPY bin/ /app/
 RUN chmod +x /app/entrypoint.sh
 
 # 3. Configuración de Wine
+ENV WINEDEBUG=-all
 ENV WINEPREFIX=/root/.wine
 ENV WINEARCH=win64
 ENV DISPLAY=:99
