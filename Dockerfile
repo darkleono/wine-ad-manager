@@ -27,7 +27,7 @@ ENV DISPLAY=:99
 WORKDIR /app
 
 # 4. Copiar los binarios que descargues (deberías ponerlos en una subcarpeta bin/)
-# COPY bin/ /app/
+COPY bin/ /app/
 
 # script para arrancar Xvfb y luego el exe con limpieza y resolucion de host
 RUN echo '#!/bin/bash\n\
