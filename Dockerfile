@@ -2,7 +2,7 @@ FROM ubuntu:22.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# 1. Instalar dependencias
+# 1. Instalar dependencias (Agregamos 'wine' para tener el comando directo)
 RUN apt-get update && apt-get install -y --no-install-recommends \
     xvfb \
     winbind \
@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-pip \
     && dpkg --add-architecture i386 \
     && apt-get update \
-    && apt-get install -y --no-install-recommends wine64 wine32 \
+    && apt-get install -y --no-install-recommends wine64 wine32 wine \
     && pip3 install --no-cache-dir flask \
     && ln -s /lib64/ld-linux-x86-64.so.2 /lib64/ld-lsb-x86-64.so.3 \
     && apt-get clean \
