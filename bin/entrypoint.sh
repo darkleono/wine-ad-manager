@@ -1,6 +1,16 @@
 #!/bin/bash
 set -e
 
+echo "--- Gestión de Persistencia y Volúmenes ---"
+# Si el archivo de licencia no existe en /app, significa que el volumen está vacío
+if [ ! -f "/app/licenses.lic" ]; then
+    echo "--- Volúmen vacío detectado. Poblado con archivos por defecto ---"
+    # Copiamos todo excepto el propio entrypoint que ya está corriendo desde /app_defaults/
+    cp -rv /app_defaults/* /app/
+else
+    echo "--- Volúmen existente detectado. Respetando archivos actuales ---"
+fi
+
 echo "--- Iniciando Configuración de Red ---"
 # Forzar la MAC necesaria para la licencia (requiere NET_ADMIN en Easypanel)
 ip link set dev eth0 down 2>/dev/null || true

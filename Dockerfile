@@ -20,9 +20,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 
-# 2. Copiar binarios y scripts
-COPY bin/ /app/
-RUN chmod +x /app/entrypoint.sh
+# 2. Copiar binarios y scripts a una carpeta de respaldo (para auto-poblar volúmenes)
+COPY bin/ /app_defaults/
+WORKDIR /app
+RUN chmod +x /app_defaults/entrypoint.sh
 
 # 3. Configuración de Wine
 ENV WINEDEBUG=-all
@@ -31,4 +32,4 @@ ENV WINEARCH=win64
 ENV DISPLAY=:99
 
 # 4. Usar el nuevo script como punto de entrada
-ENTRYPOINT ["/app/entrypoint.sh"]
+ENTRYPOINT ["/app_defaults/entrypoint.sh"]
