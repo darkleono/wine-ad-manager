@@ -1,23 +1,24 @@
 # Guía de Administración: Licencias en Red via Wine
 
-Esta guía detalla la configuración técnica para administrar el servidor de licencias `lic-bottle` basado en Wine.
+Esta guía detalla la configuración técnica para administrar el servidor de licencias `wine-ad-manager` basado en Wine.
 
 ## 1. Conceptos de Red y Puertos
 Se han fijado los puertos para evitar asignaciones dinámicas:
-- **Puerto 27001 (Externo) -> 27000 (Interno):** Puerto del Master Daemon (`lmgrd`).
-- **Puerto 2081 (Externo) -> 2080 (Interno):** Puerto del Vendor Daemon (`adskflex`).
+- **Puerto 27000 (Host) -> 27000 (Internal):** Puerto del Master Daemon (`lmgrd`).
+- **Puerto 2080 (Host) -> 2080 (Internal):** Puerto del Vendor Daemon (`adskflex`).
+- **Puerto 8080 (Host) -> 8080 (Internal):** Dashboard Web.
 
 > [!IMPORTANT]
-> Los clientes deben configurarse usando el puerto externo: `27001@IP_DEL_SERVIDOR`.
+> Los clientes deben configurarse usando: `27000@IP_DEL_SERVIDOR`.
 
 ### Configuración en Clientes (Windows)
-1.  **Variable de Entorno:** `ADSKFLEX_LICENSE_FILE` = `27001@IP_DEL_SERVIDOR`.
+1.  **Variable de Entorno:** `ADSKFLEX_LICENSE_FILE` = `27000@IP_DEL_SERVIDOR`.
 2.  **Archivo LICPATH.lic:** Localizado en la carpeta del producto (AutoCAD/Revit).
 
 ## 2. Estabilidad del HostID
 El HostID en Wine depende de la dirección MAC.
-- **FIJAR MAC:** En `docker-compose.yml`, usa `mac_address: 66:12:8f:d2:36:30`.
-- **SERVER Line:** En `licenses.lic`, usa `SERVER win-license-lab 66128fd23630 27000`.
+- **FIJAR MAC:** En `docker-compose.yml`, se usa `mac_address: 66:12:8f:d2:36:30`.
+- **SERVER Line:** En `licenses.lic`, se usa `SERVER win-license-lab 66128fd23630 27000`.
 
 ## 3. Administración de Vendors (Ej: Solidworks, Rhino)
 Para agregar nuevos programas, se recomienda la **Opción de Instancias Independientes**:
@@ -34,8 +35,32 @@ Para limitar el tiempo que un usuario puede llevarse la licencia fuera de la ofi
 
 ## 5. Mantenimiento
 - **Ver Status:** `docker exec -it autodesk-win-wine ./lmutil lmstat -a`
-- **Logs:** Consultar `bin/debug.log` para ver errores de conexión.
+- **Dashboard API:** `/api/status` para ver el JSON estructurado de usuarios.
 - **Reinicio:** `docker-compose restart` tras cambiar el archivo de licencia u opciones.
+
+## 6. Verificación de Funcionamiento (100% OK)
+
+Para confirmar que el servidor está operando correctamente tras el despliegue, el log de inicio (`docker logs autodesk-licenser`) debe mostrar este patrón exacto:
+
+### A. Red y MAC address (Éxito de forzado)
+```text
+--- Iniciando Configuración de Red ---
+MAC actual en el contenedor:
+66:12:8f:d2:36:30
+```
+> [!TIP]
+> Si ves una MAC diferente (ej. empezando por 02:42), significa que el contenedor no tiene permisos `NET_ADMIN`. Revisa la configuración de Easypanel.
+
+### B. HostID y Licencia (Éxito de Validación)
+En el log de Autodesk (`debug.log`), busca estas líneas:
+```text
+(adskflex) HostID node-locked in license file: 66128fd23630 
+(adskflex) HostID of the License Server: "66128fd23630 ..."
+(adskflex) adskflex using TCP-port 2080
+(lmgrd) adskflex started on win-license-lab
+```
+> [!SUCCESS]
+> Cuando el HostID de la licencia coincide con el del servidor, el motor `adskflex` se activa y las licencias están listas para ser repartidas.
 
 ---
 **Nota sobre versiones "Lite":** Se está explorando el uso de Alpine Linux con Wine-staging para reducir el peso de la imagen de 2.9GB a menos de 1GB en futuras iteraciones.
