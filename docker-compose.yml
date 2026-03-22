@@ -12,11 +12,13 @@ services:
     # Permiso para cambiar la MAC por software desde entrypoint.sh:
     cap_add:
       - NET_ADMIN
-    # Mapeo de puertos RAW (TCP) al mundo exterior:
     ports:
       - "27000:27000"
       - "2080:2080"
       - "8080:8080"
     volumes:
-      - ./bin:/app
+      - license_data:/app
     restart: always
+
+volumes:
+  license_data:
