@@ -75,8 +75,8 @@ def parse_lmstat(output):
     # Feature line: Users of 88030AMECH_PP_2026_0F:  (Total of 100 licenses issued;  Total of 1 license in use)
     feature_pattern = re.compile(r"Users of (.*?):.*?Total of (\d+) licenses issued;.*?Total of (\d+) license[s]* in use")
     # User line: user host host (v1.0) (server/27000 101), start Sat 3/21 11:15
-    # We use a more strict pattern to avoid catching 'vendor_string' or 'floating license' lines
-    user_pattern = re.compile(r"^\s+([\w\.-]+)\s+([\w\.-]+)\s+[\w\.-]+\s+\(v.*?\)\s+\(.*?\), start\s+(.*)$", re.MULTILINE)
+    # Optional linger: (linger: 168000)
+    user_pattern = re.compile(r"^\s+([\w\.-]+)\s+([\w\.-]+)\s+[\w\.-]+\s+\(v.*?\)\s+\(.*?\), start\s+([^(\n]*)(\(linger:\s+(\d+)\))?$", re.MULTILINE)
     
     # Iterate through each feature block
     sections = output.split("Users of ")
@@ -94,9 +94,28 @@ def parse_lmstat(output):
             users = []
             if used > 0:
                 # Find users specifically for this block
-                user_matches = user_pattern.findall(section)
-                for u, h, _, s in user_matches:
-                    users.append({"user": u, "host": h, "start": s})
+                user_matches = user_pattern.finditer(section)
+                for match in user_matches:
+                    u, h, s, _, linger_val = match.groups()
+                    is_borrowed = False
+                    borrow_info = ""
+                    
+                    if linger_val:
+                        is_borrowed = True
+                        hours_left = int(linger_val) // 3600
+                        days_left = hours_left // 24
+                        if days_left > 0:
+                            borrow_info = f"{days_left}d {hours_left % 24}h restantes"
+                        else:
+                            borrow_info = f"{hours_left}h restantes"
+
+                    users.append({
+                        "user": u.strip(), 
+                        "host": h.strip(), 
+                        "start": s.strip(),
+                        "is_borrowed": is_borrowed,
+                        "borrow_info": borrow_info
+                    })
             
             usage_data.append({
                 "feature": feature_code,

@@ -165,13 +165,21 @@
                     noUsersDiv.style.display = 'none';
                     data.usage.filter(f => f.used > 0).forEach(f => {
                         f.users.forEach(u => {
+                            const badgeColor = u.is_borrowed ? '#f59e0b' : 'var(--success)';
+                            const badgeText = u.is_borrowed ? 'PRESTADA (BORROW)' : 'ACTIVA AHORA';
+                            const extraInfo = u.is_borrowed ? `<div style="margin-top: 4px; color: #fbbf24; font-weight: 600;">⏳ ${u.borrow_info}</div>` : '';
+                            
                             activeGrid.innerHTML += `
-                                <div class="card" style="border-left: 4px solid var(--success);">
-                                    <div class="feature-name" style="color: var(--success); font-size: 0.9rem;">${f.product}</div>
+                                <div class="card" style="border-left: 4px solid ${badgeColor};">
+                                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                                        <div class="feature-name" style="color: ${badgeColor}; font-size: 0.8rem; font-weight: bold;">${f.product}</div>
+                                        <div style="font-size: 0.65rem; background: ${badgeColor}22; color: ${badgeColor}; padding: 2px 6px; border-radius: 4px; border: 1px solid ${badgeColor}44;">${badgeText}</div>
+                                    </div>
                                     <div style="font-weight: bold; font-size: 1.2rem; margin-bottom: 0.5rem;">👤 ${u.user}</div>
                                     <div style="font-size: 0.85rem; color: var(--text-dim);">
                                         <div>💻 Equipo: ${u.host}</div>
                                         <div>⏰ Inicio: ${u.start}</div>
+                                        ${extraInfo}
                                     </div>
                                 </div>
                             `;
