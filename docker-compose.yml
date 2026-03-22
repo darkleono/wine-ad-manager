@@ -1,14 +1,18 @@
 version: '3.8'
 
 services:
-  lic-win-experimental:
+  autodesk-licenser:
     build: .
+    image: darkleono/wine-ad-manager:latest
     platform: linux/amd64
     container_name: autodesk-win-wine
     hostname: win-license-lab
+    # El HostID configurado en la licencia de Autodesk:
     mac_address: 66:12:8f:d2:36:30
-    volumes:
-      - ./bin:/app
+    # Permiso para cambiar la MAC por software desde entrypoint.sh:
+    cap_add:
+      - NET_ADMIN
+    # Mapeo de puertos RAW (TCP) al mundo exterior:
     ports:
       - "27000:27000"
       - "2080:2080"
