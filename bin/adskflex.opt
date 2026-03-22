@@ -1,0 +1,5 @@
+# Archivo de opciones para AutoCAD
+# Limitar tiempo de prestamo (Borrow) a 7 dias (168 horas)
+
+MAX_BORROW_HOURS 88023ACD_2026_0F 168
+MAX_BORROW_HOURS 87919ACD_2025_0F 168
