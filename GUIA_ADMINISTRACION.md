@@ -33,12 +33,25 @@ Para limitar el tiempo que un usuario puede llevarse la licencia fuera de la ofi
 3. Asegúrate de que la línea VENDOR en el `.lic` apunte al archivo:
    `VENDOR adskflex port=2080 options=adskflex.opt`
 
-## 5. Mantenimiento
-- **Ver Status:** `docker exec -it autodesk-win-wine ./lmutil lmstat -a`
-- **Dashboard API:** `/api/status` para ver el JSON estructurado de usuarios.
-- **Reinicio:** `docker-compose restart` tras cambiar el archivo de licencia u opciones.
+## 5. Gestión Dinámica y Volúmenes (Persistencia)
+Para evitar reconstruir la imagen cada vez que cambie algo, el proyecto usa volúmenes de Docker:
 
-## 6. Verificación de Funcionamiento (100% OK)
+### A. Ubicación de archivos
+Todos los archivos críticos residen en la carpeta `./bin` del host y se mapean a `/app` en el contenedor.
+- **Editar licencias:** Edita `bin/licenses.lic` directamente.
+- **Editar límites:** Edita `bin/adskflex.opt` directamente.
+
+### B. Recarga "al vuelo" (Sin Reiniciar)
+Si haces un cambio en el archivo de opciones (ej. añadir un usuario a la blacklist), no necesitas reiniciar el contenedor. Ejecuta:
+```bash
+docker exec -it autodesk-win-wine ./lmutil_linux lmreread -c licenses.lic
+```
+*También puedes usar el botón **"Recargar Archivo LIC"** desde el Dashboard Web.*
+
+## 6. Mantenimiento y Dashboard
+- **Dashboard Web:** Accede a `http://IP-SERVIDOR:8080` para ver quién tiene licencias "Prestadas" (Borrow) y activos.
+- **Ver Status (Manual):** `docker exec -it autodesk-win-wine ./lmutil_linux lmstat -a`
+- **Reinicio Forzado:** `docker-compose restart` si necesitas un reinicio completo.
 
 Para confirmar que el servidor está operando correctamente tras el despliegue, el log de inicio (`docker logs autodesk-licenser`) debe mostrar este patrón exacto:
 

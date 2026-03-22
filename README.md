@@ -28,8 +28,14 @@ Este proyecto permite ejecutar la versión de Windows de Autodesk Network Licens
    ```
 
 ## 📖 Documentación Relacionada
-- [Guía de Administración Detallada](./GUIA_ADMINISTRACION.md)
-- [Walkthrough de Resultados](./WALKTHROUGH.md)
+- [GUIA_ADMINISTRACION.md](./GUIA_ADMINISTRACION.md): Documentación completa sobre cómo gestionar usuarios, borrow, volúmenes y recarga dinámica.
+- [WALKTHROUGH.md](./WALKTHROUGH.md): Resultados del laboratorio.
+
+## 🚀 Logros del Laboratorio
+- **Persistencia Total:** Se implementaron volúmenes para que licencias y logs sobrevivan al reinicio del contenedor.
+- **Detección de Borrow:** El Dashboard ahora identifica licencias prestadas y muestra el tiempo restante.
+- **Recarga "al vuelo":** Implementado `lmutil lmreread` para aplicar cambios sin detener el servicio.
+- **Visibilidad Avanzada:** Dashboard mejorado con badges de estado y mapeo de productos 2026.
 
 ---
 *Este laboratorio ha demostrado ser una alternativa viable y ligera para la gestión centralizada de licencias en entornos de diseño y modelado 3D.*
