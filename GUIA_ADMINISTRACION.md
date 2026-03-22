@@ -37,8 +37,8 @@ Para limitar el tiempo que un usuario puede llevarse la licencia fuera de la ofi
 Para evitar reconstruir la imagen cada vez que cambie algo, el proyecto usa volúmenes de Docker:
 
 ### A. Ubicación de archivos y Auto-poblado (Named Volumes)
-Todos los archivos críticos residen en el volumen nombrado **`license_data`** gestionado por Docker/Easypanel.
-- **Primera ejecución:** Al mapear este volumen por primera vez, el contenedor detectará que está vacío y **copiará automáticamente** los archivos internos (`/app_defaults/*`) al volumen para que sean accesibles.
+Todos los archivos críticos residen en el volumen nombrado **`license_data`** gestionado por Docker/Easypanel. El origen local de estos archivos en el repositorio es la carpeta **`bin/`**.
+- **Primera ejecución:** Al mapear este volumen por primera vez, el contenedor detectará que está vacío y **copiará automáticamente** el contenido de `bin/` (almacenado internamente en `/app_defaults/*`) al volumen para que sean accesibles.
 - **Persistencia:** Cualquier cambio que hagas en el volumen (editando archivos desde la UI de Easypanel o mediante el Dashboard) persistirá entre reinicios.
 
 ### B. Recarga "al vuelo" (Sin Reiniciar)
