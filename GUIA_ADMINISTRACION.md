@@ -76,4 +76,35 @@ En el log de Autodesk (`debug.log`), busca estas líneas:
 > Cuando el HostID de la licencia coincide con el del servidor, el motor `adskflex` se activa y las licencias están listas para ser repartidas.
 
 ---
-**Nota sobre versiones "Lite":** Se está explorando el uso de Alpine Linux con Wine-staging para reducir el peso de la imagen de 2.9GB a menos de 1GB en futuras iteraciones.
+---
+ 
+ ## 7. Protocolo de Resolución de Incidentes (SOS)
+ Si el servidor deja de entregar licencias o los usuarios reportan errores, sigue estos pasos en orden para recuperar el servicio en minutos, sin depender de soporte externo.
+ 
+ ### Paso 1: Verificar el Estado General
+ Entra al Dashboard (`http://tu-ip:8080`). 
+ - **Si el dashboard NO carga:** El contenedor está detenido. En Easypanel, dale a "Restart".
+ - **Si el dashboard carga pero dice "Server Down":** El servicio `lmgrd` falló. Ve al Paso 3.
+ 
+ ### Paso 2: El error de "HostID mismatch"
+ Si los logs dicen que el HostID no coincide, verifica que la MAC Address del contenedor no haya sido borrada o cambiada.
+ - En el `docker-compose.yml` (o en la UI de Easypanel), confirma que la MAC sea exactamente: `66:12:8f:d2:36:30`.
+ - Sin esta MAC, las licencias Autodesk nunca arrancarán.
+ 
+ ### Paso 3: Forzar Recarga de Licencias
+ Si has editado el `.lic` o el `.opt` y no ves los cambios, no reinicies todo el contenedor. Usa el botón **"Recargar Archivo LIC"** en el Dashboard. Esto ejecuta internamente `lmreread`, que refresca la configuración sin desconectar a los usuarios que ya están trabajando.
+ 
+ ### Paso 4: Revisar el Log Maestro (debug.log)
+ Si nada funciona, el archivo de log te dirá la verdad. Está en tu volumen de datos: `license_data/debug.log`.
+ - Busca palabras clave como `DENIED`, `EXITING DUE TO SIGNAL` o `INVALID LICENSE KEY`.
+ - Si ves un error de "Port in use", reinicia el contenedor para limpiar las conexiones TCP colgadas.
+ 
+ ### Paso 5: El "Botón de Pánico" (Reinicio Limpio)
+ Si el servidor se queda en un estado inconsistente:
+ 1. Asegúrate de que tus archivos en `bin/` estén correctos.
+ 2. Reinicia el contenedor desde Easypanel.
+ 3. El `entrypoint.sh` se encargará de re-configurar la red y levantar los servicios desde cero automáticamente.
+ 
+ ---
+ 
+ **Nota sobre versiones "Lite":** Se está explorando el uso de Alpine Linux con Wine-staging para reducir el peso de la imagen de 2.9GB a menos de 1GB en futuras iteraciones.
