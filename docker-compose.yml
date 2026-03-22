@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  lic-win-experimental:
+    build: .
+    platform: linux/amd64
+    container_name: autodesk-win-wine
+    hostname: win-license-lab
+    mac_address: 66:12:8f:d2:36:30
+    volumes:
+      - ./bin:/app
+    ports:
+      - "27000:27000"
+      - "2080:2080"
+      - "8080:8080"
+    restart: always
