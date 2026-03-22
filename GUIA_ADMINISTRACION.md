@@ -36,10 +36,10 @@ Para limitar el tiempo que un usuario puede llevarse la licencia fuera de la ofi
 ## 5. Gestión Dinámica y Volúmenes (Persistencia)
 Para evitar reconstruir la imagen cada vez que cambie algo, el proyecto usa volúmenes de Docker:
 
-### A. Ubicación de archivos
+### A. Ubicación de archivos y Auto-poblado
 Todos los archivos críticos residen en la carpeta `./bin` del host y se mapean a `/app` en el contenedor.
-- **Editar licencias:** Edita `bin/licenses.lic` directamente.
-- **Editar límites:** Edita `bin/adskflex.opt` directamente.
+- **Primera ejecución:** Si mappas un volumen vacío (como en Easypanel), el contenedor detectará que falta la licencia y **copiará automáticamente** los archivos internos (`/app_defaults/*`) al volumen para "exponerlos" hacia el exterior.
+- **Persistencia:** Una vez poblado, el contenedor respetará cualquier cambio que hagas manualmente en los archivos del host.
 
 ### B. Recarga "al vuelo" (Sin Reiniciar)
 Si haces un cambio en el archivo de opciones (ej. añadir un usuario a la blacklist), no necesitas reiniciar el contenedor. Ejecuta:
