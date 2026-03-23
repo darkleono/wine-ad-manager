@@ -31,5 +31,8 @@ ENV WINEPREFIX=/root/.wine
 ENV WINEARCH=win64
 ENV DISPLAY=:99
 
-# 4. Usar el nuevo script como punto de entrada
+# 4. Exponer puertos necesarios
+EXPOSE 27000 2080 8080
+
+# 5. Usar el nuevo script como punto de entrada
 ENTRYPOINT ["/app_defaults/entrypoint.sh"]
