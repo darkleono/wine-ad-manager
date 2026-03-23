@@ -15,10 +15,22 @@ Se han fijado los puertos para evitar asignaciones dinámicas:
 1.  **Variable de Entorno:** `ADSKFLEX_LICENSE_FILE` = `27000@IP_DEL_SERVIDOR`.
 2.  **Archivo LICPATH.lic:** Localizado en la carpeta del producto (AutoCAD/Revit).
 
-## 2. Estabilidad del HostID
-El HostID en Wine depende de la dirección MAC.
-- **FIJAR MAC:** En `docker-compose.yml`, se usa `mac_address: 66:12:8f:d2:36:30`.
-- **SERVER Line:** En `licenses.lic`, se usa `SERVER win-license-lab 66128fd23630 27000`.
+## 2. Configuración mediante Variables de Entorno (Producción)
+Para mayor flexibilidad en Easypanel (Modo App o Stack), el servidor ahora utiliza variables de entorno. Esto permite cambiar la identidad del servidor sin editar el código del repositorio.
+
+### Variables Requeridas:
+| Variable | Valor | Descripción |
+| :--- | :--- | :--- |
+| **`MAC_ADDRESS`** | `66:12:8f:d2:36:30` | Obligatoria para validar el HostID de la licencia. |
+| **`HOSTNAME_ID`** | `win-license-lab` | Debe coincidir con el nombre en el archivo `.lic`. |
+| **`PORT_MASTER`** | `27000` | Puerto principal de escucha. |
+| **`PORT_VENDOR`** | `2080` | Puerto del motor adskflex. |
+| **`PORT_DASHBOARD`** | `8080` | Puerto de la interfaz web. |
+
+> [!TIP]
+> En Easypanel (Modo App), además de poner estas variables en la pestaña **"Entorno"**, debes ir a **"Avanzado" -> "Mapear Puertos"** y añadir manualmente los mapeos TCP para 27000, 2080 y 8080.
+
+## 3. Estabilidad del HostID
 
 ## 3. Administración de Vendors (Ej: Solidworks, Rhino)
 Para agregar nuevos programas, se recomienda la **Opción de Instancias Independientes**:

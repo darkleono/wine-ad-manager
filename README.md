@@ -3,11 +3,12 @@
 Este proyecto permite ejecutar la versión de Windows de Autodesk Network License Manager (`lmgrd.exe`) dentro de un contenedor Linux utilizando **Wine**.
 
 ## 📊 Estado del Desarrollo
-- **Última Actualización:** 2026-03-22 | 07:54 AM
-- **Último Commit ID:** `ebd3488636e83bdbee577c951406dd781d7cb061`
-- **Avance Actual:** Implementación de persistencia vía volúmenes, límites de borrow (7 días) para AutoCAD 2025/2026, Dashboard mejorado y unificación de carpetas del proyecto en `/bin`.
+- **Última Actualización:** 2026-03-23 | 09:43 AM
+- **Rama Actual:** `prod/easypanel-stack`
+- **Avance Actual:** Despliegue exitoso en Easypanel (Modo App/Stack). Implementación de **Variables de Entorno** para MAC, Hostname y Puertos. Límites de borrow (7 días) operativos para AutoCAD 2025/2026.
 
 ## 🚀 Logros de este Laboratorio
+- **Configuración Dinámica:** Soporte para variables de entorno (`MAC_ADDRESS`, `HOSTNAME_ID`, `PORT_MASTER`, `PORT_VENDOR`) para despliegue flexible.
 - **Sincronización Total:** Se resolvió el error de "HostID mismatch" sincronizando la MAC Address del contenedor con el archivo de licencia.
 - **Identidad Fija:** Uso de `mac_address` estática en Docker para garantizar que el HostID (66128fd23630) sea persistente.
 - **Puertos Controlados:** Forzado de puertos Master (27000) y Vendor (2080) para facilitar la configuración del Firewall.
