@@ -12,9 +12,14 @@ else
 fi
 
 echo "--- Iniciando Configuración de Red ---"
-# Forzar la MAC necesaria para la licencia (requiere NET_ADMIN en Easypanel)
+# Variables de entorno con defaults
+MAC_TARGET="${MAC_ADDRESS:-66:12:8f:d2:36:30}"
+HOST_TARGET="${HOSTNAME_ID:-win-license-lab}"
+PORT_WEB="${PORT_DASHBOARD:-8080}"
+
+# Forzar la MAC necesaria para la licencia (requiere NET_ADMIN)
 ip link set dev eth0 down 2>/dev/null || true
-ip link set dev eth0 address 66:12:8f:d2:36:30 2>/dev/null || true
+ip link set dev eth0 address "$MAC_TARGET" 2>/dev/null || true
 ip link set dev eth0 up 2>/dev/null || true
 
 echo "MAC actual en el contenedor:"
@@ -24,14 +29,16 @@ cat /sys/class/net/eth0/address || echo "No se pudo leer la MAC"
 rm -f /tmp/.X99-lock /tmp/.X11-unix/X99
 
 # Resolución de host local (indispensable para FlexLM)
-echo "127.0.0.1 win-license-lab" >> /etc/hosts
+echo "127.0.0.1 $HOST_TARGET" >> /etc/hosts
+echo "IP local resuelta para: $HOST_TARGET"
 
-# Iniciar Framebuffer virtual en el background (Resolución mínima para ahorrar RAM)
+# Iniciar Framebuffer virtual
 Xvfb :99 -ac -screen 0 1x1x8 &
 sleep 2
 
-echo "Iniciando Dashboard en puerto 8080..."
-python3 /app/app.py &
+echo "Iniciando Dashboard en puerto $PORT_WEB..."
+# Pasamos el puerto a app.py
+python3 /app/app.py --port "$PORT_WEB" &
 
 echo "Iniciando Autodesk License Manager via Wine..."
 touch /app/debug.log

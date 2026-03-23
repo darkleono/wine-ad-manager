@@ -5,19 +5,23 @@ services:
     build: .
     image: darkleono/wine-ad-manager:latest
     platform: linux/amd64
-    container_name: autodesk-win-wine
-    hostname: win-license-lab
-    # El HostID configurado en la licencia de Autodesk:
-    mac_address: 66:12:8f:d2:36:30
+    container_name: ${CONTAINER_NAME:-autodesk-win-wine}
+    hostname: ${HOSTNAME_ID:-win-license-lab}
+    # El HostID configurado en la licencia de Autodesk (66128fd23630):
+    mac_address: ${MAC_ADDRESS:-66:12:8f:d2:36:30}
     # Permiso para cambiar la MAC por software desde entrypoint.sh:
     cap_add:
       - NET_ADMIN
     ports:
-      - "27000:27000"
-      - "2080:2080"
-      - "8080:8080"
+      - "${PORT_MASTER:-27000}:27000"
+      - "${PORT_VENDOR:-2080}:2080"
+      - "${PORT_DASHBOARD:-8080}:8080"
     volumes:
       - license_data:/app
+    environment:
+      - MAC_ADDRESS=${MAC_ADDRESS:-66:12:8f:d2:36:30}
+      - HOSTNAME_ID=${HOSTNAME_ID:-win-license-lab}
+      - PORT_DASHBOARD=${PORT_DASHBOARD:-8080}
     restart: always
 
 volumes:

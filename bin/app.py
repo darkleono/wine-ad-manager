@@ -160,4 +160,9 @@ def reload_lic():
         return jsonify({"status": "error", "message": str(e)})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    import argparse
+    parser = argparse.ArgumentParser(description="Autodesk License Dashboard")
+    parser.add_argument("--port", type=int, default=8080, help="Port to run the dashboard on (default: 8080)")
+    args = parser.parse_args()
+    
+    app.run(host="0.0.0.0", port=args.port)
