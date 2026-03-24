@@ -165,4 +165,4 @@ if __name__ == "__main__":
     parser.add_argument("--port", type=int, default=8080, help="Port to run the dashboard on (default: 8080)")
     args = parser.parse_args()
     
-    app.run(host="0.0.0.0", port=args.port)
+    app.run(host="0.0.0.0", port=args.port, debug=False, use_reloader=False)

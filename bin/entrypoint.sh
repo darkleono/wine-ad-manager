@@ -17,10 +17,8 @@ MAC_TARGET="${MAC_ADDRESS:-66:12:8f:d2:36:30}"
 HOST_TARGET="${HOSTNAME_ID:-win-license-lab}"
 PORT_WEB="${PORT_DASHBOARD:-8080}"
 
-# Forzar la MAC necesaria para la licencia (requiere NET_ADMIN)
-ip link set dev eth0 down 2>/dev/null || true
-ip link set dev eth0 address "$MAC_TARGET" 2>/dev/null || true
-ip link set dev eth0 up 2>/dev/null || true
+# NOTA: En Docker para Mac y algunos VPS, el cambio manual de MAC por ip link puede romper la red. 
+# La MAC se gestiona de forma nativa desde docker-compose.yml o la interfaz de Easypanel.
 
 echo "MAC actual en el contenedor:"
 cat /sys/class/net/eth0/address || echo "No se pudo leer la MAC"
@@ -37,7 +35,7 @@ Xvfb :99 -ac -screen 0 1x1x8 &
 sleep 2
 
 echo "Iniciando Dashboard en puerto $PORT_WEB..."
-# Pasamos el puerto a app.py
+# Pasamos el puerto a app.py. Modo use_reloader=False está fijado en app.py para estabilidad.
 python3 /app/app.py --port "$PORT_WEB" &
 
 echo "Iniciando Autodesk License Manager via Wine..."
