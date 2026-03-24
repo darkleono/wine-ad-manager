@@ -3,9 +3,10 @@
 Este proyecto permite ejecutar la versión de Windows de Autodesk Network License Manager (`lmgrd.exe`) dentro de un contenedor Linux utilizando **Wine**.
 
 ## 📊 Estado del Desarrollo
-- **Última Actualización:** 2026-03-23 | 05:35 PM
-- **Rama Actual:** `prod/easypanel-stack` (Commit: `bf51612`)
-- **Estado:** ✅ **ESTABLE** (Arquitectura de bindeo corregida para Mac/VPS)
+- **Última Actualización:** 2026-03-24 | 05:40 AM (Sync CST + Quiet Mode)
+- **Rama Actual:** `prod/easypanel-stack` (Commit: `453c8bb`)
+- **Estado:** ✅ **FINALIZADO Y ESTABLE**
+- **Novedades:** Control de logs por variable de entorno (`DASHBOARD_LOGS`), refresco web dinámico (`REFRESH_SECONDS`) y sincronización horaria CST con `tzdata`.
 - **Avance Actual:** Despliegue exitoso en Easypanel (Modo App/Stack). Implementación de **Variables de Entorno** para MAC, Hostname y Puertos. Límites de borrow (7 días) operativos para AutoCAD 2025/2026.
 
 ## 🚀 Logros de este Laboratorio
