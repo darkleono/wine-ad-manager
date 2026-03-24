@@ -1,7 +1,25 @@
 import os
 import subprocess
 import re
-from flask import Flask, jsonify, render_template
+import logging
+from flask import Flask, jsonify, render_template, request
+
+# Configuración de Logging dinámica
+DASHBOARD_LOGS = os.environ.get("DASHBOARD_LOGS", "true").lower() == "true"
+
+if not DASHBOARD_LOGS:
+    # Silencio total de logs de acceso (200 OK)
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
+
+class HealthCheckFilter(logging.Filter):
+    def filter(self, record):
+        # Filtro de IP de Canonical para evitar el ruido en Mac/Docker Desktop
+        msg = record.getMessage()
+        return "185.125.190.82" not in msg
+
+if DASHBOARD_LOGS:
+    logging.getLogger('werkzeug').addFilter(HealthCheckFilter())
 
 app = Flask(__name__)
 
@@ -130,7 +148,8 @@ def parse_lmstat(output):
 
 @app.route("/")
 def index():
-    return render_template("index.html")
+    refresh = os.environ.get("REFRESH_SECONDS", "60")
+    return render_template("index.html", refresh_seconds=refresh)
 
 @app.route("/api/status")
 def status():

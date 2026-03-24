@@ -221,7 +221,7 @@
         }
 
         updateStatus();
-        setInterval(updateStatus, 30000);
+        setInterval(updateStatus, {{ refresh_seconds }} * 1000);
     </script>
 </body>
 </html>

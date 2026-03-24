@@ -23,6 +23,8 @@ services:
       - HOSTNAME_ID=${HOSTNAME_ID:-win-license-lab}
       - PORT_DASHBOARD=${PORT_DASHBOARD:-8080}
       - TZ=America/Mexico_City
+      - DASHBOARD_LOGS=${DASHBOARD_LOGS:-false}
+      - REFRESH_SECONDS=${REFRESH_SECONDS:-60}
     restart: always
 
 volumes:
