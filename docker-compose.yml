@@ -22,6 +22,7 @@ services:
       - MAC_ADDRESS=${MAC_ADDRESS:-66:12:8f:d2:36:30}
       - HOSTNAME_ID=${HOSTNAME_ID:-win-license-lab}
       - PORT_DASHBOARD=${PORT_DASHBOARD:-8080}
+      - TZ=America/Mexico_City
     restart: always
 
 volumes:
