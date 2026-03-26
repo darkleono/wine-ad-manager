@@ -17,6 +17,10 @@ Se han fijado los puertos para evitar asignaciones dinámicas:
 
 ## 2. Configuración mediante Variables de Entorno (Producción)
 Para mayor flexibilidad en Easypanel (Modo App o Stack), el servidor ahora utiliza variables de entorno. Esto permite cambiar la identidad del servidor sin editar el código del repositorio.
+- **Modo Silencio Dinámico:** Controla los logs de red con `DASHBOARD_LOGS=false` en el `.env` o `docker-compose`.
+- **Sincronización CST (México):** El contenedor ya corre sincronizado con la hora local de México (`America/Mexico_City`).
+- **Filtrado de Red:** El Dashboard ignora el ruido de IPs automatizadas de red para mantener logs limpios.
+- **Refresco Configurable:** Frecuencia de actualización web ajustable vía `REFRESH_SECONDS` (defecto 60s).
 
 ### Variables Requeridas:
 | Variable | Valor | Descripción |
@@ -90,7 +94,18 @@ En el log de Autodesk (`debug.log`), busca estas líneas:
 ---
 ---
  
- ## 7. Protocolo de Resolución de Incidentes (SOS)
+ ## 7. Protocolo### 🤫 Control de Logs y Ruido (Modo Silencio)
+Para mantener la consola limpia de peticiones de red, usa estas variables en tu `docker-compose.yml`:
+- `DASHBOARD_LOGS=false`: Silencia las peticiones de la API (200 OK).
+- `REFRESH_SECONDS=60`: Controla cada cuántos segundos se actualiza la Web.
+
+### 🕒 Sincronización Horaria
+Para que los préstamos de licencias (Borrowing) coincidan con el reloj de tu Mac/Servidor:
+- Asegúrate de tener `TZ=America/Mexico_City` en las variables de entorno. El archivo `Dockerfile` ya incluye `tzdata` para soportarlo.
+
+### 📡 Filtrado de Red (SOS)
+Si ves peticiones constantes de la IP `185.125.190.82` (Canonical), el sistema ya las filtra automáticamente por software para que no ensucien tu log de usuarios.
+de Resolución de Incidentes (SOS)
  Si el servidor deja de entregar licencias o los usuarios reportan errores, sigue estos pasos en orden para recuperar el servicio en minutos, sin depender de soporte externo.
  
  ### Paso 1: Verificar el Estado General
