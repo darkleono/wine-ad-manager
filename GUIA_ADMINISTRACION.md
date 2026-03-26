@@ -19,6 +19,9 @@ Se han fijado los puertos para evitar asignaciones dinámicas:
 Para mayor flexibilidad en Easypanel (Modo App o Stack), el servidor ahora utiliza variables de entorno. Esto permite cambiar la identidad del servidor sin editar el código del repositorio.
 - **Modo Silencio Dinámico:** Controla los logs de red con `DASHBOARD_LOGS=false` en el `.env` o `docker-compose`.
 - **Sincronización CST (México):** El contenedor ya corre sincronizado con la hora local de México (`America/Mexico_City`).
+- **TZ=America/Mexico_City:** Sincronización horaria CST (GMT-6).
+- **DASHBOARD_LOGS=false:** Silencio total de peticiones web en la consola.
+- **Auditoría Express:** `docker logs autodesk-win-wine | grep -E "OUT:|IN:"` para ver usuarios reales.
 - **Filtrado de Red:** El Dashboard ignora el ruido de IPs automatizadas de red para mantener logs limpios.
 - **Refresco Configurable:** Frecuencia de actualización web ajustable vía `REFRESH_SECONDS` (defecto 60s).
 
@@ -94,7 +97,15 @@ En el log de Autodesk (`debug.log`), busca estas líneas:
 ---
 ---
  
- ## 7. Protocolo### 🤫 Control de Logs y Ruido (Modo Silencio)
+ ## 7. Protocolo### 🕵️ Auditoría de Usuarios Reales (Historial)
+Para ver quién ha sacado o devuelto licencias (limpiando el ruido del Dashboard), usa este comando en tu terminal:
+```bash
+docker logs autodesk-win-wine | grep -E "OUT:|IN:"
+```
+- **OUT:** Alguien ha abierto el programa.
+- **IN:** Alguien ha cerrado el programa.
+
+### 🤫 Control de Logs y Ruido (Modo Silencio)
 Para mantener la consola limpia de peticiones de red, usa estas variables en tu `docker-compose.yml`:
 - `DASHBOARD_LOGS=false`: Silencia las peticiones de la API (200 OK).
 - `REFRESH_SECONDS=60`: Controla cada cuántos segundos se actualiza la Web.
