@@ -28,6 +28,15 @@ echo "Iniciando Dashboard en puerto $PORT_WEB..."
 # Ejecutamos el Dashboard en segundo plano
 python3 /app/app.py --port "$PORT_WEB" &
 
+# Lógica para configurar MAX_BORROW_HOURS dinámicamente
+if [ -n "$MAX_BORROW_HOURS" ]; then
+    echo "--- Configurando MAX_BORROW_HOURS a $MAX_BORROW_HOURS horas ---"
+    touch /app/adskflex.opt
+    # Eliminamos configuraciones globales previas y añadimos la nueva
+    sed -i '/MAX_BORROW_HOURS \*/d' /app/adskflex.opt
+    echo "MAX_BORROW_HOURS * $MAX_BORROW_HOURS" >> /app/adskflex.opt
+fi
+
 echo "Iniciando Autodesk License Manager via Wine..."
 # IMPORTANTE: Para evitar logs duplicados, NO usamos -l ni tail.
 # Ejecutamos lmgrd directamente redirigiendo su salida al contenedor.
