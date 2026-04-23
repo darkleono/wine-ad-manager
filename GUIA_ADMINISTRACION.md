@@ -33,6 +33,7 @@ Para mayor flexibilidad en Easypanel (Modo App o Stack), el servidor ahora utili
 | **`PORT_MASTER`** | `27000` | Puerto principal de escucha. |
 | **`PORT_VENDOR`** | `2080` | Puerto del motor adskflex. |
 | **`PORT_DASHBOARD`** | `8080` | Puerto de la interfaz web. |
+| **`MAX_BORROW_HOURS`** | `4320` | (Opcional) Tiempo máximo de préstamo global en horas. |
 
 > [!TIP]
 > En Easypanel (Modo App), además de poner estas variables en la pestaña **"Entorno"**, debes ir a **"Avanzado" -> "Mapear Puertos"** y añadir manualmente los mapeos TCP para 27000, 2080 y 8080.
@@ -46,11 +47,17 @@ Para agregar nuevos programas, se recomienda la **Opción de Instancias Independ
 3. Esto garantiza aislamiento total: si un manager falla, los otros siguen operando.
 
 ## 4. Préstamo de Licencias (Borrowing)
-Para limitar el tiempo que un usuario puede llevarse la licencia fuera de la oficina:
-1. Crea un archivo `adskflex.opt` en la carpeta `bin/`.
-2. Ejemplo: `MAX_BORROW_HOURS 87224ACD_2020_0F 336` (2 semanas).
-3. Asegúrate de que la línea VENDOR en el `.lic` apunte al archivo:
-   `VENDOR adskflex port=2080 options=adskflex.opt`
+Para limitar el tiempo que un usuario puede llevarse la licencia fuera de la oficina de forma global:
+
+1.  **Configuración Rápida (Recomendado):** Añade la variable de entorno `MAX_BORROW_HOURS` en Easypanel. 
+    *   Ejemplo: `4320` para el máximo permitido (180 días).
+    *   Esto aplica el límite a **todos** los productos automáticamente (`*`).
+
+2.  **Configuración Específica:** Si necesitas límites distintos por programa, edita el archivo `adskflex.opt` manualmente:
+    *   Ejemplo: `MAX_BORROW_HOURS 87224ACD_2020_0F 336` (2 semanas específicamente para ese código).
+
+> [!NOTE]
+> La línea `VENDOR` en el archivo `.lic` ya está configurada para buscar las opciones en `/app/adskflex.opt`.
 
 ## 5. Gestión Dinámica y Volúmenes (Persistencia)
 Para evitar reconstruir la imagen cada vez que cambie algo, el proyecto usa volúmenes de Docker:
