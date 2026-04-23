@@ -11,6 +11,15 @@ else
 fi
 
 echo "--- Iniciando Configuración de Red ---"
+if [ -n "$MAC_ADDRESS" ]; then
+    echo "Intentando asignar MAC: $MAC_ADDRESS a eth0..."
+    ip link set eth0 down || echo "Fallo al bajar eth0"
+    ip link set eth0 address $MAC_ADDRESS || echo "Fallo al cambiar MAC"
+    ip link set eth0 up || echo "Fallo al subir eth0"
+    echo "Estado final de red:"
+    ip addr show eth0 | grep ether || echo "No se pudo obtener la MAC final"
+fi
+
 HOST_TARGET="${HOSTNAME_ID:-win-license-lab}"
 PORT_WEB="${PORT_DASHBOARD:-8080}"
 
