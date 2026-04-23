@@ -59,6 +59,11 @@ Para limitar el tiempo que un usuario puede llevarse la licencia fuera de la ofi
 > [!NOTE]
 > La línea `VENDOR` en el archivo `.lic` ya está configurada para buscar las opciones en `/app/adskflex.opt`.
 
+### Ciclo de vida del Préstamo (Borrow)
+*   **Vencimiento:** Al cumplirse el plazo, la licencia en el cliente queda inválida y el servidor la recupera automáticamente como disponible.
+*   **Renovación:** No es automática. El usuario debe conectarse a la red y volver a solicitar el préstamo manualmente.
+*   **Devolución Anticipada:** El usuario puede devolver la licencia antes de tiempo desde el software de Autodesk (menú Ayuda > Acerca de > Gestionar Licencia).
+
 ## 5. Gestión Dinámica y Volúmenes (Persistencia)
 Para evitar reconstruir la imagen cada vez que cambie algo, el proyecto usa volúmenes de Docker:
 
