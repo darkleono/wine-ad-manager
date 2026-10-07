@@ -57,8 +57,8 @@ El servidor requiere puertos públicos para licencias flotantes:
 El puerto 8080 expone una API de administración. Implementaciones de seguridad:
 
 1. **Autenticación**: ✅ Basic Auth implementado (configurar en `.dashboard_auth`)
-2. **HTTPS**: Configurar reverse proxy con TLS
-3. **IP Whitelist**: Restringir acceso a IPs conocidas
+2. **HTTPS**: ✅ Documentado en HTTPS-CONFIGURATION.md (3 opciones)
+3. **IP Whitelist**: ✅ Documentado con rangos de ISPs mexicanos
 
 #### Configuración de Autenticación
 
