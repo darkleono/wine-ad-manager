@@ -22,7 +22,10 @@ class HealthCheckFilter(logging.Filter):
 if DASHBOARD_LOGS:
     logging.getLogger('werkzeug').addFilter(HealthCheckFilter())
 
-app = Flask(__name__)
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+
+app = Flask(__name__, template_folder=TEMPLATE_DIR)
 
 LMUTIL_PATH = "/app/lmutil_linux"
 LICENSE_FILE = "/app/licenses.lic"
@@ -30,13 +33,13 @@ AUTH_FILE = "/app/.dashboard_auth"
 
 def get_auth_config():
     """Retrieve auth settings from environment variables or .dashboard_auth file."""
-    env_user = os.environ.get("DASHBOARD_USER")
-    env_pass = os.environ.get("DASHBOARD_PASS")
-    env_enabled_raw = os.environ.get("DASHBOARD_AUTH_ENABLED")
+    env_user = os.environ.get("DASHBOARD_USER", "").strip()
+    env_pass = os.environ.get("DASHBOARD_PASS", "").strip()
+    env_enabled_raw = os.environ.get("DASHBOARD_AUTH_ENABLED", "").strip().lower()
 
     # 1. Si están definidas en Variables de Entorno (Easypanel / Docker Compose)
-    if env_user is not None and env_pass is not None:
-        auth_enabled = (env_enabled_raw.lower() == "true") if env_enabled_raw is not None else True
+    if env_user and env_pass:
+        auth_enabled = (env_enabled_raw == "true") if env_enabled_raw else True
         return auth_enabled, env_user, env_pass
 
     # 2. Fallback a archivo .dashboard_auth si existe
@@ -49,14 +52,15 @@ def get_auth_config():
                         key, value = line.strip().split('=', 1)
                         file_config[key.strip()] = value.strip()
             
-            expected_user = file_config.get('DASHBOARD_USER', '')
-            expected_pass = file_config.get('DASHBOARD_PASS', '')
+            expected_user = file_config.get('DASHBOARD_USER', '').strip()
+            expected_pass = file_config.get('DASHBOARD_PASS', '').strip()
             auth_enabled = file_config.get('DASHBOARD_AUTH_ENABLED', 'true').lower() == 'true'
-            return auth_enabled, expected_user, expected_pass
-        except Exception:
-            pass
+            if expected_user and expected_pass:
+                return auth_enabled, expected_user, expected_pass
+        except Exception as e:
+            logging.error(f"Error leyendo {AUTH_FILE}: {e}")
 
-    # 3. Sin configuración de autenticación: libre por defecto
+    # 3. Sin credenciales configuradas: acceso abierto
     return False, "", ""
 
 def check_auth(username, password):

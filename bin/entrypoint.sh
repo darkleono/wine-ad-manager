@@ -2,15 +2,27 @@
 set -e
 
 echo "--- Gestión de Persistencia y Volúmenes ---"
-# Si el archivo de licencia no existe en /app, significa que el volumen está vacío
-if [ ! -f "/app/licenses.lic" ]; then
-    echo "--- Volúmen vacío detectado. Poblado con archivos por defecto ---"
-    # Copiar como licenseuser para mantener permisos correctos
-    cp -rv /app_defaults/* /app/
-    chown -R licenseuser:licenseuser /app/ 2>/dev/null || true
-else
-    echo "--- Volúmen existente detectado. Respetando archivos actuales ---"
-fi
+# Asegurar directorios requeridos en /app
+mkdir -p /app/templates
+
+# Sincronizar siempre el código del dashboard y plantillas actualizadas desde la imagen
+echo "Sincronizando Dashboard y binarios actualizados..."
+cp -rf /app_defaults/templates/* /app/templates/ 2>/dev/null || true
+cp -f /app_defaults/app.py /app/app.py 2>/dev/null || true
+cp -f /app_defaults/lmutil_linux /app/lmutil_linux 2>/dev/null || true
+chmod +x /app/lmutil_linux 2>/dev/null || true
+
+# Copiar archivos de configuración o licencias solo si no existen (para no sobreescribir licencias del usuario)
+for file in /app_defaults/*; do
+    filename=$(basename "$file")
+    if [ ! -e "/app/$filename" ]; then
+        echo "Poblando archivo inicial: $filename"
+        cp -r "$file" "/app/"
+    fi
+done
+
+# Garantizar permisos de usuario sin privilegios en todo /app
+chown -R licenseuser:licenseuser /app 2>/dev/null || true
 
 echo "--- Iniciando Configuración de Red ---"
 # Nota: El cambio de MAC requiere CAP_NET_ADMIN (ya concedido via cap_add)

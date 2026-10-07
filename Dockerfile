@@ -34,21 +34,21 @@ COPY bin/ /app_defaults/
 RUN chmod +x /app_defaults/entrypoint.sh \
     && chown -R licenseuser:licenseuser /app_defaults
 
-# 4. Configuración de Wine (ejecutándose como usuario sin privilegios)
+# 4. Configuración de Wine optimizada (Memoria reducida)
 ENV WINEDEBUG=-all
 ENV WINEPREFIX=/home/licenseuser/.wine
 ENV WINEARCH=win64
+ENV WINEDLLOVERRIDES="mscoree,mshtml="
 ENV DISPLAY=:99
 ENV HOME=/home/licenseuser
 
-# 4. Exponer puertos necesarios
+# 5. Pre-inicializar Wine durante el build para evitar consumo de RAM por wineboot en caliente
+RUN gosu licenseuser wineboot -i \
+    && gosu licenseuser wineserver -w \
+    && rm -rf /tmp/* /tmp/.wine*
+
+# 6. Exponer puertos necesarios
 EXPOSE 27000 2080 8080
 
-# 5. Nota de seguridad:
-# - El contenedor inicia como root para operaciones de red (CAP_NET_ADMIN)
-# - Wine y lmgrd.exe se ejecutan como usuario 'licenseuser' vía gosu
-# - Esta arquitectura mitiga el riesgo de container breakout desde Wine/FlexNet
-# - Para máxima seguridad: reverse proxy TLS + IP whitelist
-
-# 6. Usar el nuevo script como punto de entrada
+# 7. Usar el nuevo script como punto de entrada
 ENTRYPOINT ["/app_defaults/entrypoint.sh"]
