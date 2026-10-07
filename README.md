@@ -22,6 +22,45 @@ Este proyecto permite ejecutar la versión de Windows de Autodesk Network Licens
 - `bin/`: Directorio donde deben residir los ejecutables (`lmgrd.exe`, `adskflex.exe`) y el archivo de licencia `licenses.lic`.
 - `GUIA_ADMINISTRACION.md`: Documentación completa sobre cómo gestionar usuarios, puertos y vendors adicionales.
 
+## 📂 Archivos Compose según Destino de Despliegue
+
+El proyecto incluye distintas variantes de `docker-compose` según el entorno de infraestructura objetivo:
+
+| Archivo | Entorno Recomendado | Características |
+|---|---|---|
+| **`docker-compose.yml`** | **Easypanel / PaaS** | Optimizado para orquestadores. Usa `expose` en lugar de `ports` y omite `container_name` para evitar advertencias y colisiones de red. |
+| **`docker-compose_normal.yml`** | **Docker Standalone / VPS / Portainer** | Mapeo directo de puertos (`27000`, `2080`, `8080`) al host y nombre de contenedor fijo (`autodesk-win-wine`). |
+| **`docker-compose.with-caddy.yml`** | **Producción con HTTPS Automático** | Integra proxy inverso Caddy con emisión automática de certificados SSL (Let's Encrypt), cabeceras de seguridad y filtrado por IP Whitelist. |
+
+### Comandos de Ejecución:
+
+```bash
+# 1. En Easypanel (utiliza automáticamente docker-compose.yml)
+
+# 2. En VPS o Docker directo (Standalone):
+docker-compose -f docker-compose_normal.yml up -d --build
+
+# 3. Con HTTPS y Caddy automático:
+docker-compose -f docker-compose.with-caddy.yml up -d --build
+```
+
+---
+
+## 🧹 Tamaño de Imagen y Limpieza de Caché de Build
+
+* **Tamaño final en disco:** ~2.8 GB (capas optimizadas con limpieza de `/var/cache`, man pages y temporales).
+* **Consumo RAM:** ~200-250 MB en ejecución.
+
+Si tras varias construcciones sucesivas en el host o Easypanel notas que el disco acumula espacio residual de BuildKit, ejecuta:
+
+```bash
+# Liberar caché acumulado de builds anteriores en el VPS
+docker builder prune -a -f
+docker image prune -f
+```
+
+---
+
 ## 🛠️ Instrucciones de Inicio Rápido
 
 1. **Preparar archivos:** Coloca tus binarios de Windows y tu archivo `.lic` en la carpeta `bin/`.

@@ -18,7 +18,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && pip3 install --no-cache-dir flask \
     && ln -s /lib64/ld-linux-x86-64.so.2 /lib64/ld-lsb-x86-64.so.3 \
     && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* /usr/share/doc/* /usr/share/man/* /var/cache/apt/*
 
 WORKDIR /app
 
