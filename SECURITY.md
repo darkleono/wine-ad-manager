@@ -81,6 +81,28 @@ El puerto 8080 expone una API de administración. Implementaciones de seguridad:
    # No debe aparecer nada
    ```
 
+#### Configuración de IP Whitelist
+
+Para restringir el acceso a IPs específicas de proveedores mexicanos:
+
+1. Crear archivo de whitelist:
+   ```bash
+   cd wine-ad-manager/bin/
+   cp .ip_whitelist.example .ip_whitelist
+   ```
+
+2. Editar `.ip_whitelist` con los rangos permitidos:
+   - El archivo incluye rangos de TOTALPLAY, IZZI/Cablemas y TELMEX
+   - Agregar IPs específicas de oficina/VPN según sea necesario
+
+3. Verificar que el archivo esté en `.gitignore`:
+   ```bash
+   git status --porcelain | grep ip_whitelist
+   # No debe aparecer nada
+   ```
+
+**Nota:** La implementación de IP Whitelist requiere configuración adicional a nivel de reverse proxy (Nginx/Traefik) o firewall del servidor.
+
 ## NetAdmin Capability
 
 El contenedor requiere `NET_ADMIN` para:
