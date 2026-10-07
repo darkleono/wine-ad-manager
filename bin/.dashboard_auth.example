@@ -1,0 +1,13 @@
+# Dashboard Authentication Configuration
+# COPIAR este archivo como .dashboard_auth y configurar las credenciales
+# NUNCA commitear el archivo .dashboard_auth real
+
+# Username for dashboard access
+DASHBOARD_USER=admin
+
+# Password for dashboard access (use a strong password)
+DASHBOARD_PASS=change_this_password
+
+# Optional: Enable/disable authentication (default: true)
+# Set to "false" to disable auth (NOT RECOMMENDED for production)
+DASHBOARD_AUTH_ENABLED=true

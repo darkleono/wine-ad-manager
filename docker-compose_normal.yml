@@ -1,23 +1,19 @@
 services:
-  app:
+  autodesk-licenser:
     build: .
     image: darkleono/wine-ad-manager:latest
     platform: linux/amd64
+    container_name: ${CONTAINER_NAME:-autodesk-win-wine}
     hostname: ${HOSTNAME_ID:-win-license-lab}
     # El HostID configurado en la licencia de Autodesk (66128fd23630):
     mac_address: ${MAC_ADDRESS:-66:12:8f:d2:36:30}
     # Permiso para cambiar la MAC por software desde entrypoint.sh:
     cap_add:
       - NET_ADMIN
-    # Puertos públicos para clientes FlexNet (AutoCAD/Revit) y Dashboard
     ports:
       - "${PORT_MASTER:-27000}:27000"
       - "${PORT_VENDOR:-2080}:2080"
       - "${PORT_DASHBOARD:-8080}:8080"
-    expose:
-      - "8080"
-      - "27000"
-      - "2080"
     volumes:
       - license_data:/app
     environment:

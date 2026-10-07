@@ -1,0 +1,63 @@
+# Docker Compose con Caddy Reverse Proxy para HTTPS automático
+# Uso: docker-compose -f docker-compose.with-caddy.yml up -d
+
+services:
+  # Autodesk License Server
+  autodesk-licenser:
+    build: .
+    image: darkleono/wine-ad-manager:latest
+    platform: linux/amd64
+    container_name: ${CONTAINER_NAME:-autodesk-win-wine}
+    hostname: ${HOSTNAME_ID:-win-license-lab}
+    mac_address: ${MAC_ADDRESS:-66:12:8f:d2:36:30}
+    cap_add:
+      - NET_ADMIN
+    # No exponer puerto 8080 al host (solo interno via Caddy)
+    expose:
+      - "8080"
+    volumes:
+      - license_data:/app
+    environment:
+      - MAC_ADDRESS=${MAC_ADDRESS:-66:12:8f:d2:36:30}
+      - HOSTNAME_ID=${HOSTNAME_ID:-win-license-lab}
+      - PORT_DASHBOARD=${PORT_DASHBOARD:-8080}
+      - TZ=America/Mexico_City
+      - DASHBOARD_LOGS=${DASHBOARD_LOGS:-false}
+      - REFRESH_SECONDS=${REFRESH_SECONDS:-60}
+      - DASHBOARD_USER=${DASHBOARD_USER:-}
+      - DASHBOARD_PASS=${DASHBOARD_PASS:-}
+      - DASHBOARD_AUTH_ENABLED=${DASHBOARD_AUTH_ENABLED:-false}
+    restart: always
+    networks:
+      - license-network
+
+  # Caddy Reverse Proxy - HTTPS automático con Let's Encrypt
+  caddy:
+    image: caddy:2-alpine
+    container_name: caddy-proxy
+    restart: always
+    ports:
+      - "80:80"      # HTTP (redirige a HTTPS)
+      - "443:443"    # HTTPS
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks:
+      - license-network
+    depends_on:
+      - autodesk-licenser
+    healthcheck:
+      test: ["CMD", "caddy", "validate", "--config", "/etc/caddy/Caddyfile"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  license_data:
+  caddy_data:
+  caddy_config:
+
+networks:
+  license-network:
+    driver: bridge

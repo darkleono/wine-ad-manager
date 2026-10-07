@@ -1,12 +1,97 @@
 import os
 import subprocess
 import re
-from flask import Flask, jsonify, render_template
+import logging
+from flask import Flask, jsonify, render_template, request, Response
+from functools import wraps
 
-app = Flask(__name__)
+# Configuración de Logging dinámica
+DASHBOARD_LOGS = os.environ.get("DASHBOARD_LOGS", "true").lower() == "true"
+
+if not DASHBOARD_LOGS:
+    # Silencio total de logs de acceso (200 OK)
+    log = logging.getLogger('werkzeug')
+    log.setLevel(logging.ERROR)
+
+class HealthCheckFilter(logging.Filter):
+    def filter(self, record):
+        # Filtro de IP de Canonical para evitar el ruido en Mac/Docker Desktop
+        msg = record.getMessage()
+        return "185.125.190.82" not in msg
+
+if DASHBOARD_LOGS:
+    logging.getLogger('werkzeug').addFilter(HealthCheckFilter())
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")
+
+app = Flask(__name__, template_folder=TEMPLATE_DIR)
 
 LMUTIL_PATH = "/app/lmutil_linux"
 LICENSE_FILE = "/app/licenses.lic"
+AUTH_FILE = "/app/.dashboard_auth"
+
+def get_auth_config():
+    """Retrieve auth settings from environment variables or .dashboard_auth file."""
+    env_user = os.environ.get("DASHBOARD_USER", "").strip()
+    env_pass = os.environ.get("DASHBOARD_PASS", "").strip()
+    env_enabled_raw = os.environ.get("DASHBOARD_AUTH_ENABLED", "").strip().lower()
+
+    # 1. Si están definidas en Variables de Entorno (Easypanel / Docker Compose)
+    if env_user and env_pass:
+        auth_enabled = (env_enabled_raw == "true") if env_enabled_raw else True
+        return auth_enabled, env_user, env_pass
+
+    # 2. Fallback a archivo .dashboard_auth si existe
+    if os.path.exists(AUTH_FILE):
+        try:
+            with open(AUTH_FILE, 'r') as f:
+                file_config = {}
+                for line in f:
+                    if '=' in line and not line.strip().startswith('#'):
+                        key, value = line.strip().split('=', 1)
+                        file_config[key.strip()] = value.strip()
+            
+            expected_user = file_config.get('DASHBOARD_USER', '').strip()
+            expected_pass = file_config.get('DASHBOARD_PASS', '').strip()
+            auth_enabled = file_config.get('DASHBOARD_AUTH_ENABLED', 'true').lower() == 'true'
+            if expected_user and expected_pass:
+                return auth_enabled, expected_user, expected_pass
+        except Exception as e:
+            logging.error(f"Error leyendo {AUTH_FILE}: {e}")
+
+    # 3. Sin credenciales configuradas: acceso abierto
+    return False, "", ""
+
+def check_auth(username, password):
+    """Verify username and password"""
+    auth_enabled, expected_user, expected_pass = get_auth_config()
+    if not auth_enabled:
+        return True
+    return username == expected_user and password == expected_pass
+
+def authenticate():
+    """Send 401 response for authentication"""
+    return Response(
+        'Authentication required.\n'
+        'Configure DASHBOARD_USER and DASHBOARD_PASS environment variables or .dashboard_auth file',
+        401,
+        {'WWW-Authenticate': 'Basic realm="Autodesk License Dashboard"'}
+    )
+
+def requires_auth(f):
+    """Decorator for routes requiring authentication"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth_enabled, _, _ = get_auth_config()
+        if not auth_enabled:
+            return f(*args, **kwargs)
+        
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 # Feature code to Product mapping (2020-2026)
 FEATURE_MAP = {
@@ -75,8 +160,8 @@ def parse_lmstat(output):
     # Feature line: Users of 88030AMECH_PP_2026_0F:  (Total of 100 licenses issued;  Total of 1 license in use)
     feature_pattern = re.compile(r"Users of (.*?):.*?Total of (\d+) licenses issued;.*?Total of (\d+) license[s]* in use")
     # User line: user host host (v1.0) (server/27000 101), start Sat 3/21 11:15
-    # We use a more strict pattern to avoid catching 'vendor_string' or 'floating license' lines
-    user_pattern = re.compile(r"^\s+([\w\.-]+)\s+([\w\.-]+)\s+[\w\.-]+\s+\(v.*?\)\s+\(.*?\), start\s+(.*)$", re.MULTILINE)
+    # Optional linger: (linger: 168000)
+    user_pattern = re.compile(r"^\s+([\w\.-]+)\s+([\w\.-]+)\s+[\w\.-]+\s+\(v.*?\)\s+\(.*?\), start\s+([^(\n]*)(\(linger:\s+(\d+)\))?$", re.MULTILINE)
     
     # Iterate through each feature block
     sections = output.split("Users of ")
@@ -94,9 +179,28 @@ def parse_lmstat(output):
             users = []
             if used > 0:
                 # Find users specifically for this block
-                user_matches = user_pattern.findall(section)
-                for u, h, _, s in user_matches:
-                    users.append({"user": u, "host": h, "start": s})
+                user_matches = user_pattern.finditer(section)
+                for match in user_matches:
+                    u, h, s, _, linger_val = match.groups()
+                    is_borrowed = False
+                    borrow_info = ""
+                    
+                    if linger_val:
+                        is_borrowed = True
+                        hours_left = int(linger_val) // 3600
+                        days_left = hours_left // 24
+                        if days_left > 0:
+                            borrow_info = f"{days_left}d {hours_left % 24}h restantes"
+                        else:
+                            borrow_info = f"{hours_left}h restantes"
+
+                    users.append({
+                        "user": u.strip(), 
+                        "host": h.strip(), 
+                        "start": s.strip(),
+                        "is_borrowed": is_borrowed,
+                        "borrow_info": borrow_info
+                    })
             
             usage_data.append({
                 "feature": feature_code,
@@ -110,10 +214,13 @@ def parse_lmstat(output):
     return usage_data
 
 @app.route("/")
+@requires_auth
 def index():
-    return render_template("index.html")
+    refresh = os.environ.get("REFRESH_SECONDS", "60")
+    return render_template("index.html", refresh_seconds=refresh)
 
 @app.route("/api/status")
+@requires_auth
 def status():
     output = get_lmstat_output()
     usage = parse_lmstat(output)
@@ -132,6 +239,7 @@ def status():
     })
 
 @app.route("/api/reload")
+@requires_auth
 def reload_lic():
     try:
         # lmreread command
@@ -141,4 +249,9 @@ def reload_lic():
         return jsonify({"status": "error", "message": str(e)})
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=8080)
+    import argparse
+    parser = argparse.ArgumentParser(description="Autodesk License Dashboard")
+    parser.add_argument("--port", type=int, default=8080, help="Port to run the dashboard on (default: 8080)")
+    args = parser.parse_args()
+    
+    app.run(host="0.0.0.0", port=args.port, debug=False, use_reloader=False)
