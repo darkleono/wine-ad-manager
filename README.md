@@ -37,6 +37,7 @@ Este proyecto permite ejecutar la versión de Windows de Autodesk Network Licens
 
 ## 📖 Documentación Relacionada
 - [GUIA_ADMINISTRACION.md](./GUIA_ADMINISTRACION.md): Documentación completa sobre cómo gestionar usuarios, borrow, volúmenes y recarga dinámica.
+- [HTTPS-CONFIGURATION.md](./HTTPS-CONFIGURATION.md): Guía de configuración HTTPS/TLS (Nginx PM, Caddy, Traefik).
 - [WALKTHROUGH.md](./WALKTHROUGH.md): Resultados del laboratorio.
 
 ## 🚀 Logros del Laboratorio

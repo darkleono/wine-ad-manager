@@ -1,0 +1,66 @@
+# Caddyfile - Reverse Proxy con HTTPS automático para Autodesk License Server
+# Documentación completa: HTTPS-CONFIGURATION.md
+
+# Reemplazar 'licenses.tuempresa.com' con tu dominio real
+licenses.tuempresa.com {
+    # IP Whitelist - Solo permitir ISPs mexicanos autorizados
+    # TOTALPLAY (AS18734)
+    @totalplay remote_ip 148.229.0.0/16 187.164.0.0/18 189.202.128.0/17 189.204.128.0/17 201.140.96.0/19 201.148.0.0/18
+    
+    # IZZI/CABLEMAS (AS28509)
+    @izzi remote_ip 177.236.0.0/15 177.238.0.0/20 187.185.112.0/20 187.185.192.0/20 187.252.64.0/20 189.214.0.0/15
+    
+    # TELMEX (AS8151)
+    @telmex remote_ip 148.212.0.0/15 148.217.0.0/16 148.219.0.0/16 187.131.0.0/16 187.157.0.0/16 187.203.0.0/16 189.161.0.0/16 189.170.0.0/15 201.99.0.0/16 201.100.0.0/15
+    
+    # Permitir acceso desde IPs autorizadas
+    handle @totalplay {
+        reverse_proxy autodesk-win-wine:8080
+    }
+    handle @izzi {
+        reverse_proxy autodesk-win-wine:8080
+    }
+    handle @telmex {
+        reverse_proxy autodesk-win-wine:8080
+    }
+    
+    # Bloquear todo lo demás (IP no autorizada)
+    handle {
+        respond "Access Denied - IP not in whitelist" 403 {
+            close
+        }
+    }
+    
+    # Security Headers (OWASP recommendations)
+    header {
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        X-Frame-Options "SAMEORIGIN"
+        X-Content-Type-Options "nosniff"
+        X-XSS-Protection "1; mode=block"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Permissions-Policy "geolocation=(), microphone=(), camera=()"
+    }
+    
+    # Logging para auditoría
+    log {
+        output file /var/log/caddy/licenses-access.log {
+            roll_size 100mb
+            roll_keep 5
+            roll_keep_days 7
+        }
+        format json
+    }
+}
+
+# Configuración alternativa sin IP Whitelist (NO RECOMENDADO PARA PRODUCCIÓN)
+# Descomentar solo para desarrollo/testing
+#
+# licenses-dev.tuempresa.com {
+#     reverse_proxy autodesk-win-wine:8080
+#     
+#     header {
+#         Strict-Transport-Security "max-age=31536000"
+#         X-Frame-Options "SAMEORIGIN"
+#         X-Content-Type-Options "nosniff"
+#     }
+# }
