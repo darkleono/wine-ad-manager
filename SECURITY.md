@@ -62,6 +62,17 @@ El puerto 8080 expone una API de administración. Implementaciones de seguridad:
 
 #### Configuración de Autenticación
 
+Existen dos formas de configurar las credenciales:
+
+**Método A: Vía Variables de Entorno (Recomendado para Easypanel y Compose)**
+En la sección de variables de entorno de tu contenedor / stack:
+```env
+DASHBOARD_USER=admin
+DASHBOARD_PASS=TuPasswordSeguro123!
+DASHBOARD_AUTH_ENABLED=true
+```
+
+**Método B: Vía Archivo `.dashboard_auth`**
 1. Crear archivo de credenciales:
    ```bash
    cd wine-ad-manager/bin/
