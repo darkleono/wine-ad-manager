@@ -25,21 +25,17 @@ done
 chown -R licenseuser:licenseuser /app 2>/dev/null || true
 
 echo "--- Iniciando Configuración de Red ---"
-# Nota: El cambio de MAC requiere CAP_NET_ADMIN (ya concedido via cap_add)
-# Si el contenedor se ejecuta como root inicialmente, realizar operaciones de red
+# Nota: El cambio de MAC requiere CAP_NET_ADMIN (concedido via cap_add o modo privilegiado)
 if [ -n "$MAC_ADDRESS" ]; then
-    echo "Intentando asignar MAC: $MAC_ADDRESS a eth0..."
-    # Intentar con privilegios elevados si están disponibles
-    if [ "$(id -u)" -eq 0 ] || command -v sudo >/dev/null 2>&1; then
-        ip link set eth0 down 2>/dev/null || echo "Fallo al bajar eth0 (puede requerir NET_ADMIN)"
-        ip link set eth0 address "$MAC_ADDRESS" 2>/dev/null || echo "Fallo al cambiar MAC (puede requerir NET_ADMIN)"
-        ip link set eth0 up 2>/dev/null || echo "Fallo al subir eth0"
-        echo "Estado final de red:"
-        ip addr show eth0 | grep ether || echo "No se pudo obtener la MAC final"
-    else
-        echo "ADVERTENCIA: No se puede cambiar MAC sin privilegios NET_ADMIN"
-        echo "El contenedor debe ejecutarse con cap_add: NET_ADMIN"
-    fi
+    echo "Intentando asignar MAC: $MAC_ADDRESS en todas las interfaces activas..."
+    for iface in $(ip -o link show | awk -F': ' '{print $2}' | grep -v 'lo' | cut -d'@' -f1); do
+        echo "Asignando MAC a interfaz: $iface..."
+        ip link set "$iface" down 2>/dev/null || true
+        ip link set "$iface" address "$MAC_ADDRESS" 2>/dev/null || echo "Aviso: No se pudo cambiar MAC en $iface (requiere permiso NET_ADMIN o Privileged)"
+        ip link set "$iface" up 2>/dev/null || true
+    done
+    echo "Estado final de interfaces de red:"
+    ip link show | grep ether || echo "No se encontraron interfaces ethernet"
 fi
 
 HOST_TARGET="${HOSTNAME_ID:-win-license-lab}"
