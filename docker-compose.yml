@@ -9,12 +9,15 @@ services:
     # Permiso para cambiar la MAC por software desde entrypoint.sh:
     cap_add:
       - NET_ADMIN
-    # Easypanel maneja los puertos automáticamente
-    # Para Docker standalone, usar: ports en lugar de expose
+    # Puertos públicos para clientes FlexNet (AutoCAD/Revit) y Dashboard
+    ports:
+      - "${PORT_MASTER:-27000}:27000"
+      - "${PORT_VENDOR:-2080}:2080"
+      - "${PORT_DASHBOARD:-8080}:8080"
     expose:
+      - "8080"
       - "27000"
       - "2080"
-      - "8080"
     volumes:
       - license_data:/app
     environment:

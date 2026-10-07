@@ -47,8 +47,8 @@ RUN gosu licenseuser wineboot -i \
     && gosu licenseuser wineserver -w \
     && rm -rf /tmp/* /tmp/.wine*
 
-# 6. Exponer puertos necesarios
-EXPOSE 27000 2080 8080
+# 6. Exponer puertos necesarios (8080 primero para que Traefik/Easypanel lo asigne al dominio web)
+EXPOSE 8080 27000 2080
 
 # 7. Usar el nuevo script como punto de entrada
 ENTRYPOINT ["/app_defaults/entrypoint.sh"]

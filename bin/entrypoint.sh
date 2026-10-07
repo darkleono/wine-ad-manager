@@ -62,7 +62,7 @@ sleep 2
 
 echo "Iniciando Dashboard en puerto $PORT_WEB..."
 # Ejecutamos el Dashboard en segundo plano como usuario sin privilegios
-gosu licenseuser python3 /app/app.py --port "$PORT_WEB" &
+gosu licenseuser python3 -u /app/app.py --port "$PORT_WEB" &
 
 # Lógica para configurar MAX_BORROW_HOURS dinámicamente
 if [ -n "$MAX_BORROW_HOURS" ]; then
