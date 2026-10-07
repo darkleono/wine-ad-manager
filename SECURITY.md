@@ -54,11 +54,32 @@ El servidor requiere puertos públicos para licencias flotantes:
 
 ### Endurecimiento del Dashboard
 
-El puerto 8080 expone una API de administración. Recomendaciones:
+El puerto 8080 expone una API de administración. Implementaciones de seguridad:
 
-1. **Autenticación**: Implementar Basic Auth (ver `feature/api-auth`)
+1. **Autenticación**: ✅ Basic Auth implementado (configurar en `.dashboard_auth`)
 2. **HTTPS**: Configurar reverse proxy con TLS
 3. **IP Whitelist**: Restringir acceso a IPs conocidas
+
+#### Configuración de Autenticación
+
+1. Crear archivo de credenciales:
+   ```bash
+   cd wine-ad-manager/bin/
+   cp .dashboard_auth.example .dashboard_auth
+   ```
+
+2. Editar `.dashboard_auth` con credenciales seguras:
+   ```bash
+   DASHBOARD_USER=admin
+   DASHBOARD_PASS=your_secure_password_here
+   DASHBOARD_AUTH_ENABLED=true
+   ```
+
+3. Verificar que el archivo esté en `.gitignore`:
+   ```bash
+   git status --porcelain | grep dashboard_auth
+   # No debe aparecer nada
+   ```
 
 ## NetAdmin Capability
 

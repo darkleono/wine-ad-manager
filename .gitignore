@@ -31,3 +31,7 @@ secrets/
 credentials/
 *.key
 *.pem
+
+# Dashboard authentication (wine-ad-manager)
+wine-ad-manager/bin/.htpasswd
+wine-ad-manager/bin/.dashboard_auth
