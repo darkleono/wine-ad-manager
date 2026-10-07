@@ -2,7 +2,8 @@ import os
 import subprocess
 import re
 import logging
-from flask import Flask, jsonify, render_template, request
+from flask import Flask, jsonify, render_template, request, Response
+from functools import wraps
 
 # Configuración de Logging dinámica
 DASHBOARD_LOGS = os.environ.get("DASHBOARD_LOGS", "true").lower() == "true"
@@ -25,6 +26,67 @@ app = Flask(__name__)
 
 LMUTIL_PATH = "/app/lmutil_linux"
 LICENSE_FILE = "/app/licenses.lic"
+AUTH_FILE = "/app/.dashboard_auth"
+
+def check_auth(username, password):
+    """Verify username and password against .dashboard_auth file"""
+    if not os.path.exists(AUTH_FILE):
+        return False
+    
+    try:
+        with open(AUTH_FILE, 'r') as f:
+            auth_config = {}
+            for line in f:
+                if '=' in line and not line.startswith('#'):
+                    key, value = line.strip().split('=', 1)
+                    auth_config[key.strip()] = value.strip()
+        
+        expected_user = auth_config.get('DASHBOARD_USER', '')
+        expected_pass = auth_config.get('DASHBOARD_PASS', '')
+        auth_enabled = auth_config.get('DASHBOARD_AUTH_ENABLED', 'true').lower() == 'true'
+        
+        if not auth_enabled:
+            return True
+        
+        return username == expected_user and password == expected_pass
+    except Exception:
+        return False
+
+def authenticate():
+    """Send 401 response for authentication"""
+    return Response(
+        'Authentication required.\n'
+        'Configure credentials in .dashboard_auth file',
+        401,
+        {'WWW-Authenticate': 'Basic realm="Autodesk License Dashboard"'}
+    )
+
+def requires_auth(f):
+    """Decorator for routes requiring authentication"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        if not os.path.exists(AUTH_FILE):
+            return f(*args, **kwargs)
+        
+        try:
+            with open(AUTH_FILE, 'r') as file:
+                auth_config = {}
+                for line in file:
+                    if '=' in line and not line.startswith('#'):
+                        key, value = line.strip().split('=', 1)
+                        auth_config[key.strip()] = value.strip()
+            
+            auth_enabled = auth_config.get('DASHBOARD_AUTH_ENABLED', 'true').lower() == 'true'
+            if not auth_enabled:
+                return f(*args, **kwargs)
+        except Exception:
+            pass
+        
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
 
 # Feature code to Product mapping (2020-2026)
 FEATURE_MAP = {
@@ -147,11 +209,13 @@ def parse_lmstat(output):
     return usage_data
 
 @app.route("/")
+@requires_auth
 def index():
     refresh = os.environ.get("REFRESH_SECONDS", "60")
     return render_template("index.html", refresh_seconds=refresh)
 
 @app.route("/api/status")
+@requires_auth
 def status():
     output = get_lmstat_output()
     usage = parse_lmstat(output)
@@ -170,6 +234,7 @@ def status():
     })
 
 @app.route("/api/reload")
+@requires_auth
 def reload_lic():
     try:
         # lmreread command
