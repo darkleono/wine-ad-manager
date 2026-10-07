@@ -24,6 +24,9 @@ services:
       - TZ=America/Mexico_City
       - DASHBOARD_LOGS=${DASHBOARD_LOGS:-false}
       - REFRESH_SECONDS=${REFRESH_SECONDS:-60}
+      - DASHBOARD_USER=${DASHBOARD_USER:-}
+      - DASHBOARD_PASS=${DASHBOARD_PASS:-}
+      - DASHBOARD_AUTH_ENABLED=${DASHBOARD_AUTH_ENABLED:-false}
     restart: always
     networks:
       - license-network

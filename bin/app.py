@@ -28,35 +28,49 @@ LMUTIL_PATH = "/app/lmutil_linux"
 LICENSE_FILE = "/app/licenses.lic"
 AUTH_FILE = "/app/.dashboard_auth"
 
+def get_auth_config():
+    """Retrieve auth settings from environment variables or .dashboard_auth file."""
+    env_user = os.environ.get("DASHBOARD_USER")
+    env_pass = os.environ.get("DASHBOARD_PASS")
+    env_enabled_raw = os.environ.get("DASHBOARD_AUTH_ENABLED")
+
+    # 1. Si están definidas en Variables de Entorno (Easypanel / Docker Compose)
+    if env_user is not None and env_pass is not None:
+        auth_enabled = (env_enabled_raw.lower() == "true") if env_enabled_raw is not None else True
+        return auth_enabled, env_user, env_pass
+
+    # 2. Fallback a archivo .dashboard_auth si existe
+    if os.path.exists(AUTH_FILE):
+        try:
+            with open(AUTH_FILE, 'r') as f:
+                file_config = {}
+                for line in f:
+                    if '=' in line and not line.strip().startswith('#'):
+                        key, value = line.strip().split('=', 1)
+                        file_config[key.strip()] = value.strip()
+            
+            expected_user = file_config.get('DASHBOARD_USER', '')
+            expected_pass = file_config.get('DASHBOARD_PASS', '')
+            auth_enabled = file_config.get('DASHBOARD_AUTH_ENABLED', 'true').lower() == 'true'
+            return auth_enabled, expected_user, expected_pass
+        except Exception:
+            pass
+
+    # 3. Sin configuración de autenticación: libre por defecto
+    return False, "", ""
+
 def check_auth(username, password):
-    """Verify username and password against .dashboard_auth file"""
-    if not os.path.exists(AUTH_FILE):
-        return False
-    
-    try:
-        with open(AUTH_FILE, 'r') as f:
-            auth_config = {}
-            for line in f:
-                if '=' in line and not line.startswith('#'):
-                    key, value = line.strip().split('=', 1)
-                    auth_config[key.strip()] = value.strip()
-        
-        expected_user = auth_config.get('DASHBOARD_USER', '')
-        expected_pass = auth_config.get('DASHBOARD_PASS', '')
-        auth_enabled = auth_config.get('DASHBOARD_AUTH_ENABLED', 'true').lower() == 'true'
-        
-        if not auth_enabled:
-            return True
-        
-        return username == expected_user and password == expected_pass
-    except Exception:
-        return False
+    """Verify username and password"""
+    auth_enabled, expected_user, expected_pass = get_auth_config()
+    if not auth_enabled:
+        return True
+    return username == expected_user and password == expected_pass
 
 def authenticate():
     """Send 401 response for authentication"""
     return Response(
         'Authentication required.\n'
-        'Configure credentials in .dashboard_auth file',
+        'Configure DASHBOARD_USER and DASHBOARD_PASS environment variables or .dashboard_auth file',
         401,
         {'WWW-Authenticate': 'Basic realm="Autodesk License Dashboard"'}
     )
@@ -65,22 +79,9 @@ def requires_auth(f):
     """Decorator for routes requiring authentication"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        if not os.path.exists(AUTH_FILE):
+        auth_enabled, _, _ = get_auth_config()
+        if not auth_enabled:
             return f(*args, **kwargs)
-        
-        try:
-            with open(AUTH_FILE, 'r') as file:
-                auth_config = {}
-                for line in file:
-                    if '=' in line and not line.startswith('#'):
-                        key, value = line.strip().split('=', 1)
-                        auth_config[key.strip()] = value.strip()
-            
-            auth_enabled = auth_config.get('DASHBOARD_AUTH_ENABLED', 'true').lower() == 'true'
-            if not auth_enabled:
-                return f(*args, **kwargs)
-        except Exception:
-            pass
         
         auth = request.authorization
         if not auth or not check_auth(auth.username, auth.password):

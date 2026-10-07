@@ -46,6 +46,22 @@ docker-compose -f docker-compose.with-caddy.yml up -d --build
 
 ---
 
+## 🔐 Seguridad y Autenticación del Dashboard
+
+El Dashboard Web incluye soporte nativo de **Basic Auth**. Puedes configurar las credenciales mediante **Variables de Entorno** (ideal para Easypanel) o mediante el archivo `/app/.dashboard_auth`:
+
+### Variables de Entorno soportadas:
+```env
+DASHBOARD_USER=admin
+DASHBOARD_PASS=SuperClave2026!
+DASHBOARD_AUTH_ENABLED=true
+```
+
+* Si `DASHBOARD_AUTH_ENABLED` es `false` o no se definen credenciales, el dashboard funcionará en modo abierto.
+* Si se configuran `DASHBOARD_USER` y `DASHBOARD_PASS`, el acceso web requerirá autenticación inmediata.
+
+---
+
 ## 🧹 Tamaño de Imagen y Limpieza de Caché de Build
 
 * **Tamaño final en disco:** ~2.8 GB (capas optimizadas con limpieza de `/var/cache`, man pages y temporales).
