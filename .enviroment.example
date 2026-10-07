@@ -1,0 +1,39 @@
+# Template de configuración de entorno
+# COPIAR este archivo como .enviroment y completar los valores
+# NUNCA commitear el archivo .enviroment real
+
+# ============================================
+# SERVIDORES VPS - CREDENCIALES DE ACCESO
+# ============================================
+
+# ORACLE Cloud VPS
+VPS_ORACLE=<IP_DEL_SERVIDOR>
+VPS_ORACLE_USER=<usuario>
+VPS_ORACLE_PASSWORD=<contraseña_segura>
+
+# IONOS/easypanel VPS
+VPS_IONOS_SERVER_IP=<IP_DEL_SERVIDOR>
+VPS_IONOS_SERVER_USER=<usuario>
+VPS_IONOS_SERVER_PASS=<contraseña_segura>
+
+# ============================================
+# CONFIGURACIÓN DEL CONTENEDOR
+# ============================================
+
+# MAC Address vinculada a la licencia Autodesk
+MAC_ADDRESS=00:00:00:00:00:00
+
+# Nombre del contenedor
+CONTAINER_NAME=autodesk-licenser
+
+# Hostname del servidor de licencias
+HOSTNAME_ID=license-server
+
+# Puertos (solo cambiar si hay conflictos)
+PORT_MASTER=27000
+PORT_VENDOR=2080
+PORT_DASHBOARD=8080
+
+# Dashboard
+DASHBOARD_LOGS=false
+REFRESH_SECONDS=60

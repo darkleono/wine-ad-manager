@@ -21,3 +21,13 @@ debug.log
 .idea/
 .vscode/
 node_modules/
+
+# Archivos de entorno y secrets (CREDENCIALES NUNCA EN GIT)
+.env
+.env.*
+.enviroment
+*.env
+secrets/
+credentials/
+*.key
+*.pem
