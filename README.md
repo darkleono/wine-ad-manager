@@ -22,6 +22,42 @@ Este proyecto permite ejecutar la versión de Windows de Autodesk Network Licens
 - `bin/`: Directorio donde deben residir los ejecutables (`lmgrd.exe`, `adskflex.exe`) y el archivo de licencia `licenses.lic`.
 - `GUIA_ADMINISTRACION.md`: Documentación completa sobre cómo gestionar usuarios, puertos y vendors adicionales.
 
+## 🛠️ Despliegue en Easypanel (Paso a Paso)
+
+Para desplegar este servidor en **Easypanel** con éxito:
+
+### 1. Requisito Crítico: Permiso de Red (`NET_ADMIN`)
+El daemon de Autodesk (`adskflex`) exige validar la dirección MAC fija asociada a la licencia. Para que el contenedor pueda asignar la MAC dinámicamente en todas sus interfaces de red:
+* **En Easypanel:** Ve a tu servicio -> Pestaña **Advanced** -> Sección **Capabilities / Cap Add** -> Añade **`NET_ADMIN`** (o activa la casilla **Privileged**).
+
+> [!WARNING]
+> Sin la capability `NET_ADMIN`, el cambio de MAC fallará y `adskflex` se cerrará inmediatamente con: `adskflex exited with status 25 (Invalid host) / No valid hostids`.
+
+### 2. Variables de Entorno en Easypanel:
+En la pestaña **Environment**, configura:
+```env
+MAC_ADDRESS=66:12:8f:d2:36:30
+HOSTNAME_ID=win-license-lab
+PORT_MASTER=27000
+PORT_VENDOR=2080
+PORT_DASHBOARD=8080
+DASHBOARD_USER=admin
+DASHBOARD_PASS=TuPasswordSeguro123!
+DASHBOARD_AUTH_ENABLED=true
+MAX_BORROW_HOURS=4320
+TZ=America/Mexico_City
+DASHBOARD_LOGS=false
+```
+
+### 3. Puertos y Dominios:
+* **Dashboard Web:** En la pestaña **Domains**, asigna tu dominio apuntando al puerto contenedor **`8080`**.
+* **Puertos de Licencias (TCP):** En **Advanced -> Port Mapping**, publica:
+  - `27000:27000` (Master Daemon `lmgrd`)
+  - `2080:2080` (Vendor Daemon `adskflex`)
+  - `8080:8080` (Dashboard Web directo - opcional)
+
+---
+
 ## 📂 Archivos Compose según Destino de Despliegue
 
 El proyecto incluye distintas variantes de `docker-compose` según el entorno de infraestructura objetivo:

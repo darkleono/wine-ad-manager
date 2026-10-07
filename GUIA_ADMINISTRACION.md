@@ -35,6 +35,10 @@ Para mayor flexibilidad en Easypanel (Modo App o Stack), el servidor ahora utili
 | **`PORT_DASHBOARD`** | `8080` | Puerto de la interfaz web. |
 | **`MAX_BORROW_HOURS`** | `4320` | (Opcional) Tiempo máximo de préstamo global en horas. |
 
+> [!IMPORTANT]
+> **Permiso de Red `NET_ADMIN` en Easypanel:**  
+> En modo App (Dockerfile), ve a **"Avanzado" (Advanced) -> "Cap Add / Capabilities"** y añade **`NET_ADMIN`** (o activa la casilla **"Privileged"**). Este permiso es estrictamente indispensable para que el script `entrypoint.sh` asigne la `MAC_ADDRESS` a todas las interfaces virtuales del contenedor, evitando el error `Exit reason 2 (Invalid host)`.
+
 > [!TIP]
 > En Easypanel (Modo App), además de poner estas variables en la pestaña **"Entorno"**, debes ir a **"Avanzado" -> "Mapear Puertos"** y añadir manualmente los mapeos TCP para 27000, 2080 y 8080.
 
