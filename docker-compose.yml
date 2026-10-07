@@ -1,5 +1,5 @@
 services:
-  autodesk-licenser:
+  app:
     build: .
     image: darkleono/wine-ad-manager:latest
     platform: linux/amd64
