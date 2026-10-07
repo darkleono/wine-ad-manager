@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Docker Compose con Caddy Reverse Proxy para HTTPS automático
 # Uso: docker-compose -f docker-compose.with-caddy.yml up -d
 
